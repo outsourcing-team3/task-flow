@@ -1,12 +1,12 @@
-defaultBranch: 'main'
+defaultBranch: 'develop'
 branchName: '${issue.number}'
 branches:
-  - label: '*'
-    prefix: issues/
   - label: 🚀 feature
     prefix: feature/
   - label: 🛠 refactor
     prefix: refactor/
   - label: 🐞 bug
     prefix: bugfix/
+  - label: '*'
+    prefix: issues/
 autoCloseIssue: true
