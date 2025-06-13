@@ -1,4 +1,4 @@
-defaultBranch: 'develop'
+defaultBranch: 'main'
 branchName: '${issue.number}'
 branches:
   - label: '*'
