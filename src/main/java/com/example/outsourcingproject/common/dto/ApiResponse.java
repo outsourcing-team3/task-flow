@@ -13,7 +13,6 @@ public class ApiResponse<T> {
     private final String message;
     private final T data;
     private final LocalDateTime timestamp;
-    private final String code;
 
     // 성공 응답 생성자
     private ApiResponse(T data, String message) {
@@ -21,16 +20,14 @@ public class ApiResponse<T> {
         this.message = message;
         this.data = data;
         this.timestamp = LocalDateTime.now();
-        this.code = null;
     }
 
     // 실패 응답 생성자
-    private ApiResponse(String message, String code) {
+    private ApiResponse(String message) {
         this.success = false;
         this.message = message;
         this.data = null;
         this.timestamp = LocalDateTime.now();
-        this.code = code;
     }
 
     // 성공 - 데이터 있음
@@ -54,7 +51,7 @@ public class ApiResponse<T> {
     }
 
     // 실패
-    public static <T> ApiResponse<T> failure(String message, String code) {
-        return new ApiResponse<>(message, code);
+    public static <T> ApiResponse<T> failure(String message) {
+        return new ApiResponse<>(message);
     }
 }
