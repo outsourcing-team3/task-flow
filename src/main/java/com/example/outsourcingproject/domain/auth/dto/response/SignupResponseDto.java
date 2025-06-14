@@ -3,13 +3,13 @@ package com.example.outsourcingproject.domain.auth.dto.response;
 import lombok.Getter;
 
 @Getter
-public class SignupResponse {
+public class SignupResponseDto {
 
-    private final String bearerToken;
+    private final String token;
     private final String refreshToken;
 
-    public SignupResponse(String bearerToken, String refreshToken) {
-        this.bearerToken = bearerToken;
+    public SignupResponseDto(String token, String refreshToken) {
+        this.token = token;
         this.refreshToken = refreshToken;
     }
 }
