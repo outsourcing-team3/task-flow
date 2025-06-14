@@ -32,13 +32,13 @@ public class User extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
-    private UserRole userRole; // USER, ADMIN
+    private UserRole role; // USER, ADMIN
 
     public User(String name, String username, String email, String password, UserRole userRole) {
         this.name = name;
         this.username = username;
         this.email = email;
         this.password = password;
-        this.userRole = userRole;
+        this.role = userRole;
     }
 }

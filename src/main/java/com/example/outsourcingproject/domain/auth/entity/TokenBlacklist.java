@@ -35,5 +35,6 @@ public class TokenBlacklist {
         this.jti = jti;
         this.userId = userId;
         this.expiryTime = expiryTime;
+        this.createdAt = LocalDateTime.now();
     }
 }

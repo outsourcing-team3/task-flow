@@ -4,6 +4,7 @@ import com.example.outsourcingproject.global.exception.JwtAccessDeniedHandler;
 import com.example.outsourcingproject.global.exception.JwtAuthenticationEntryPoint;
 import com.example.outsourcingproject.global.security.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -16,6 +17,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+@Slf4j
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
@@ -28,22 +30,29 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        log.info("SecurityConfig 실행됨");
         return http
                 .csrf(AbstractHttpConfigurer::disable)
 
-                .cors(cors -> cors.configure(http))
+                .cors(cors -> cors
+                        .configurationSource(request -> {
+                            var config = new org.springframework.web.cors.CorsConfiguration();
+                            config.setAllowedOriginPatterns(java.util.List.of("*"));
+                            config.setAllowedMethods(java.util.List.of("*"));
+                            config.setAllowedHeaders(java.util.List.of("*"));
+                            config.setAllowCredentials(true);
+                            config.setMaxAge(3600L);
+                            return config;
+                        })
+                )
 
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
-                .authorizeHttpRequests(auth -> auth
-
-                        .requestMatchers("/auth/**").permitAll()
-
-                        .requestMatchers("/admin/**").hasRole("ADMIN")
-
-                        .anyRequest().authenticated()
-                )
+                .authorizeHttpRequests(auth -> {
+                    log.info("모든 요청 허용으로 설정 (테스트용)");
+                    auth.anyRequest().permitAll();
+                })
 
                 .exceptionHandling(exceptions -> exceptions
                         .authenticationEntryPoint(jwtAuthenticationEntryPoint)
