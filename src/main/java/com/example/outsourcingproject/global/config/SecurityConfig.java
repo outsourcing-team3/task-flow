@@ -34,25 +34,16 @@ public class SecurityConfig {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
 
-                .cors(cors -> cors
-                        .configurationSource(request -> {
-                            var config = new org.springframework.web.cors.CorsConfiguration();
-                            config.setAllowedOriginPatterns(java.util.List.of("*"));
-                            config.setAllowedMethods(java.util.List.of("*"));
-                            config.setAllowedHeaders(java.util.List.of("*"));
-                            config.setAllowCredentials(true);
-                            config.setMaxAge(3600L);
-                            return config;
-                        })
-                )
-
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
-                .authorizeHttpRequests(auth -> {
-                    log.info("모든 요청 허용으로 설정 (테스트용)");
-                    auth.anyRequest().permitAll();
-                })
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(
+                                "/auth/signup",
+                                "/auth/signin"
+                        ).permitAll()
+                        .anyRequest().authenticated()
+                )
 
                 .exceptionHandling(exceptions -> exceptions
                         .authenticationEntryPoint(jwtAuthenticationEntryPoint)

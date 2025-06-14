@@ -46,10 +46,10 @@ public class AuthService {
         String encodedPassword = passwordEncoder.encode(signupRequest.getPassword());
 
         User newUser = new User(
+                signupRequest.getName(),
                 signupRequest.getUsername(),
                 signupRequest.getEmail(),
                 encodedPassword,
-                signupRequest.getName(),
                 userRole
         );
         User savedUser = userRepository.save(newUser);
@@ -69,11 +69,8 @@ public class AuthService {
             throw new RateLimitException("로그인이 일시적으로 차단되었습니다.", remainingMinutes);
         }
 
-        User user = userRepository.findByEmailAndIsDeletedFalse(email)
-                .orElseThrow(() -> {
-                    loginAttemptService.recordFailedAttempt(email);
-                    return new InvalidCredentialsException("이메일 또는 비밀번호가 올바르지 않습니다.");
-                });
+        User user = userRepository.findActiveByEmail(email)
+                .orElseThrow(() -> new InvalidCredentialsException("이메일 또는 비밀번호가 올바르지 않다."));
 
         if (!passwordEncoder.matches(signinRequest.getPassword(), user.getPassword())) {
             loginAttemptService.recordFailedAttempt(email);
