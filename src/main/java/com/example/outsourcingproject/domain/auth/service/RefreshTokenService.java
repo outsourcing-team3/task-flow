@@ -3,7 +3,9 @@ package com.example.outsourcingproject.domain.auth.service;
 import com.example.outsourcingproject.domain.auth.entity.RefreshToken;
 import com.example.outsourcingproject.domain.auth.repository.RefreshTokenRepository;
 import com.example.outsourcingproject.domain.auth.exception.InvalidCredentialsException;
+import com.example.outsourcingproject.global.security.JwtProperties;
 import lombok.RequiredArgsConstructor;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,6 +17,7 @@ import java.util.UUID;
 public class RefreshTokenService {
 
     private final RefreshTokenRepository refreshTokenRepository;
+    private final JwtProperties jwtProperties;
 
     @Transactional
     public String createRefreshToken(Long userId) {
@@ -22,7 +25,9 @@ public class RefreshTokenService {
         refreshTokenRepository.deleteByUserId(userId);
 
         String token = UUID.randomUUID().toString();
-        LocalDateTime expiresAt = LocalDateTime.now().plusDays(14);
+
+        long refreshExpirationMillis = jwtProperties.getRefreshExpirationTime();
+        LocalDateTime expiresAt = LocalDateTime.now().plusSeconds(refreshExpirationMillis / 1000);
 
         RefreshToken refreshToken = new RefreshToken(token, userId, expiresAt);
         refreshTokenRepository.save(refreshToken);
@@ -45,5 +50,16 @@ public class RefreshTokenService {
     @Transactional
     public void deleteRefreshTokenByUserId(Long userId) {
         refreshTokenRepository.deleteByUserId(userId);
+    }
+
+    @Transactional
+    public void deleteExpiredTokens() {
+        refreshTokenRepository.deleteByExpiryTimeBefore(LocalDateTime.now());
+    }
+
+    @Scheduled(cron = "0 0 2 * * *")
+    @Transactional
+    public void cleanupExpiredTokens() {
+        deleteExpiredTokens();
     }
 }

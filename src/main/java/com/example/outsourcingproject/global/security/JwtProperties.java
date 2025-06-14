@@ -13,7 +13,9 @@ public class JwtProperties {
 
     private Long expirationTime = 900_000L;
 
-    private String issuer = "expert-app";
+    private Long refreshExpirationTime = 1_209_600_000L;
+
+    private String issuer = "taskflow-app";
 
     private String bearerPrefix = "Bearer ";
 }
