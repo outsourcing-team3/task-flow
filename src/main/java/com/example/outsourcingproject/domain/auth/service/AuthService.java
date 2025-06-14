@@ -54,10 +54,7 @@ public class AuthService {
         );
         User savedUser = userRepository.save(newUser);
 
-        String accessToken = jwtTokenProvider.createToken(savedUser.getId(), savedUser.getEmail(), userRole);
-        String refreshToken = refreshTokenService.createRefreshToken(savedUser.getId());
-
-        return new SignupResponseDto(accessToken, refreshToken);
+        return new SignupResponseDto(savedUser.getUsername(), savedUser.getEmail());
     }
 
     @Transactional
