@@ -37,13 +37,19 @@ public class AuthService {
             throw new DuplicateEmailException("이미 존재하는 이메일입니다.");
         }
 
-        UserRole userRole = UserRole.of(signupRequest.getUserRole());
+        if (userRepository.existsByUsername(signupRequest.getUsername())) {
+            throw new DuplicateEmailException("이미 존재하는 사용자명입니다.");
+        }
+
+        UserRole userRole = UserRole.USER;
 
         String encodedPassword = passwordEncoder.encode(signupRequest.getPassword());
 
         User newUser = new User(
+                signupRequest.getUsername(),
                 signupRequest.getEmail(),
                 encodedPassword,
+                signupRequest.getName(),
                 userRole
         );
         User savedUser = userRepository.save(newUser);
