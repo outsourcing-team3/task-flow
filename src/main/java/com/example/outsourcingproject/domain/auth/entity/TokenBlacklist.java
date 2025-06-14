@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.CreatedDate;
 
 import java.time.LocalDateTime;
 
@@ -18,7 +17,7 @@ public class TokenBlacklist {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true, nullable = false, length = 36)
+    @Column(name = "jti", unique = true, nullable = false, length = 36)
     private String jti;
 
     @Column(name = "user_id", nullable = false)
@@ -27,7 +26,6 @@ public class TokenBlacklist {
     @Column(name = "expiry_time", nullable = false)
     private LocalDateTime expiryTime;
 
-    @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
