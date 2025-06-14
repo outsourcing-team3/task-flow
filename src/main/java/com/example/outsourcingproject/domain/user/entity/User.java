@@ -1,6 +1,7 @@
 package com.example.outsourcingproject.domain.user.entity;
 
 import com.example.outsourcingproject.domain.user.enums.UserRole;
+import com.example.outsourcingproject.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -11,7 +12,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "users")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class User {
+public class User extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

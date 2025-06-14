@@ -1,9 +1,9 @@
 package com.example.outsourcingproject.domain.auth.service;
 
-import com.example.outsourcingproject.domain.auth.dto.request.SigninRequest;
-import com.example.outsourcingproject.domain.auth.dto.request.SignupRequest;
-import com.example.outsourcingproject.domain.auth.dto.response.SigninResponse;
-import com.example.outsourcingproject.domain.auth.dto.response.SignupResponse;
+import com.example.outsourcingproject.domain.auth.dto.request.SigninRequestDto;
+import com.example.outsourcingproject.domain.auth.dto.request.SignupRequestDto;
+import com.example.outsourcingproject.domain.auth.dto.response.SigninResponseDto;
+import com.example.outsourcingproject.domain.auth.dto.response.SignupResponseDto;
 import com.example.outsourcingproject.domain.auth.entity.RefreshToken;
 import com.example.outsourcingproject.domain.auth.exception.DuplicateEmailException;
 import com.example.outsourcingproject.domain.auth.exception.InvalidCredentialsException;
@@ -31,7 +31,7 @@ public class AuthService {
     private final LoginAttemptService loginAttemptService;
 
     @Transactional
-    public SignupResponse signup(SignupRequest signupRequest) {
+    public SignupResponseDto signup(SignupRequestDto signupRequest) {
 
         if (userRepository.existsByEmail(signupRequest.getEmail())) {
             throw new DuplicateEmailException("이미 존재하는 이메일입니다.");
@@ -48,14 +48,14 @@ public class AuthService {
         );
         User savedUser = userRepository.save(newUser);
 
-        String bearerToken = jwtTokenProvider.createToken(savedUser.getId(), savedUser.getEmail(), userRole);
+        String accessToken = jwtTokenProvider.createToken(savedUser.getId(), savedUser.getEmail(), userRole);
         String refreshToken = refreshTokenService.createRefreshToken(savedUser.getId());
 
-        return new SignupResponse(bearerToken, refreshToken);
+        return new SignupResponseDto(accessToken, refreshToken);
     }
 
     @Transactional
-    public SigninResponse signin(SigninRequest signinRequest) {
+    public SigninResponseDto signin(SigninRequestDto signinRequest) {
         String email = signinRequest.getEmail();
 
         if (loginAttemptService.isBlocked(email)) {
@@ -63,7 +63,7 @@ public class AuthService {
             throw new RateLimitException("로그인이 일시적으로 차단되었습니다.", remainingMinutes);
         }
 
-        User user = userRepository.findByEmail(email)
+        User user = userRepository.findByEmailAndIsDeletedFalse(email)
                 .orElseThrow(() -> {
                     loginAttemptService.recordFailedAttempt(email);
                     return new InvalidCredentialsException("이메일 또는 비밀번호가 올바르지 않습니다.");
@@ -79,15 +79,15 @@ public class AuthService {
 
         loginAttemptService.recordSuccessfulLogin(email);
 
-        return new SigninResponse(accessToken, refreshToken);
+        return new SigninResponseDto(accessToken, refreshToken);
     }
 
     @Transactional
-    public SigninResponse refreshToken(String refreshTokenValue) {
+    public SigninResponseDto refreshToken(String refreshTokenValue) {
 
         RefreshToken refreshToken = refreshTokenService.validateRefreshToken(refreshTokenValue);
 
-        User user = userRepository.findById(refreshToken.getUserId())
+        User user = userRepository.findByIdAndIsDeletedFalse(refreshToken.getUserId())
                 .orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없습니다."));
 
         String newAccessToken = jwtTokenProvider.createToken(
@@ -98,7 +98,7 @@ public class AuthService {
 
         String newRefreshToken = refreshTokenService.createRefreshToken(user.getId());
 
-        return new SigninResponse(newAccessToken, newRefreshToken);
+        return new SigninResponseDto(newAccessToken, newRefreshToken);
     }
 
     @Transactional
@@ -106,6 +106,21 @@ public class AuthService {
         if (StringUtils.hasText(accessToken)) {
             tokenBlacklistService.addTokenToBlacklist(accessToken, userId);
         }
+
+        refreshTokenService.deleteRefreshTokenByUserId(userId);
+    }
+
+    @Transactional
+    public void withdraw(Long userId, String password) {
+        User user = userRepository.findByIdAndIsDeletedFalse(userId)
+                .orElseThrow(() -> new InvalidCredentialsException("사용자를 찾을 수 없습니다."));
+
+        if (!passwordEncoder.matches(password, user.getPassword())) {
+            throw new InvalidCredentialsException("비밀번호가 일치하지 않습니다.");
+        }
+
+        user.delete();
+        userRepository.save(user);
 
         refreshTokenService.deleteRefreshTokenByUserId(userId);
     }
