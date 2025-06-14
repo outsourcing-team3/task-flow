@@ -34,21 +34,6 @@ public class User extends BaseEntity {
     @Column(nullable = false, length = 20)
     private UserRole userRole; // USER, ADMIN
 
-
-    public static User createUser(String username, String email, String password, String name, UserRole userRole) {
-        User user = new User();
-        user.username = username;
-        user.email = email;
-        user.password = password;
-        user.name = name;
-        user.userRole = userRole;
-        return user;
-    }
-
-    public void updateRole(UserRole userRole) {
-        this.userRole = userRole;
-    }
-
     public User(String email, String password, UserRole userRole) {
         this.email = email;
         this.password = password;
