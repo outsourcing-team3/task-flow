@@ -80,7 +80,7 @@ public class AuthService {
             throw new InvalidCredentialsException("이메일 또는 비밀번호가 올바르지 않습니다.");
         }
 
-        String accessToken = jwtTokenProvider.createToken(user.getId(), user.getEmail(), user.getUserRole());
+        String accessToken = jwtTokenProvider.createToken(user.getId(), user.getEmail(), user.getRole());
         String refreshToken = refreshTokenService.createRefreshToken(user.getId());
 
         loginAttemptService.recordSuccessfulLogin(email);
@@ -99,7 +99,7 @@ public class AuthService {
         String newAccessToken = jwtTokenProvider.createToken(
                 user.getId(),
                 user.getEmail(),
-                user.getUserRole()
+                user.getRole()
         );
 
         String newRefreshToken = refreshTokenService.createRefreshToken(user.getId());
