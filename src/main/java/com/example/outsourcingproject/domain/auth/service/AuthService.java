@@ -62,25 +62,25 @@ public class AuthService {
 
     @Transactional
     public SigninResponseDto signin(SigninRequestDto signinRequest) {
-        String email = signinRequest.getEmail();
+        String username = signinRequest.getUsername();
 
-        if (loginAttemptService.isBlocked(email)) {
-            long remainingMinutes = loginAttemptService.getRemainingBlockTimeMinutes(email);
+        if (loginAttemptService.isBlocked(username)) {
+            long remainingMinutes = loginAttemptService.getRemainingBlockTimeMinutes(username);
             throw new RateLimitException("로그인이 일시적으로 차단되었습니다.", remainingMinutes);
         }
 
-        User user = userRepository.findActiveByEmail(email)
-                .orElseThrow(() -> new InvalidCredentialsException("이메일 또는 비밀번호가 올바르지 않다."));
+        User user = userRepository.findActiveByUsername(username)
+                .orElseThrow(() -> new InvalidCredentialsException("잘못된 사용자명 또는 비밀번호입니다"));
 
         if (!passwordEncoder.matches(signinRequest.getPassword(), user.getPassword())) {
-            loginAttemptService.recordFailedAttempt(email);
-            throw new InvalidCredentialsException("이메일 또는 비밀번호가 올바르지 않습니다.");
+            loginAttemptService.recordFailedAttempt(username);
+            throw new InvalidCredentialsException("잘못된 사용자명 또는 비밀번호입니다");
         }
 
         String accessToken = jwtTokenProvider.createToken(user.getId(), user.getEmail(), user.getRole());
         String refreshToken = refreshTokenService.createRefreshToken(user.getId());
 
-        loginAttemptService.recordSuccessfulLogin(email);
+        loginAttemptService.recordSuccessfulLogin(username);
 
         return new SigninResponseDto(accessToken, refreshToken);
     }
