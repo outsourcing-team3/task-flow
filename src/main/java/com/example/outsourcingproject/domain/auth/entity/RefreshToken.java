@@ -1,6 +1,5 @@
 package com.example.outsourcingproject.domain.auth.entity;
 
-import com.example.outsourcingproject.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
