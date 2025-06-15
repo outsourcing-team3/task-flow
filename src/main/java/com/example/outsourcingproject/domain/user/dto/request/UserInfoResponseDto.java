@@ -3,8 +3,6 @@ package com.example.outsourcingproject.domain.user.dto.request;
 import com.example.outsourcingproject.domain.user.entity.User;
 import lombok.Getter;
 
-import java.time.LocalDateTime;
-
 @Getter
 public class UserInfoResponseDto {
 
