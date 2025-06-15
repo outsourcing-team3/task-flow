@@ -25,6 +25,12 @@ public class AuthExceptionHandler{
     return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
   }
 
+  @ExceptionHandler(InvalidUserRoleException.class)
+  public ResponseEntity<ApiResponse<Void>> handleInvalidUserRole(InvalidUserRoleException ex) {
+    ApiResponse<Void> response = ApiResponse.failure(ex.getMessage());
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+  }
+
   // 404 - 사용자 없음
   @ExceptionHandler(UserNotFoundException.class)
   public ResponseEntity<ApiResponse<Void>> handleUserNotFound(UserNotFoundException ex) {
