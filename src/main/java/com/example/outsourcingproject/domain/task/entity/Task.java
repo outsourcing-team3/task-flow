@@ -6,6 +6,7 @@ import lombok.Getter;
 import java.time.LocalDateTime;
 
 @Getter
+@Entity
 @Table(name = "tasks")
 public class Task {
 
