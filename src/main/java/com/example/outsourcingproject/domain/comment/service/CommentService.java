@@ -4,12 +4,12 @@ import com.example.outsourcingproject.domain.comment.dto.CommentRequestDto;
 import com.example.outsourcingproject.domain.comment.dto.CommentResponseDto;
 import com.example.outsourcingproject.domain.comment.entity.Comment;
 import com.example.outsourcingproject.domain.comment.repository.CommentRepository;
-import com.example.outsourcingproject.domain.task.entity.Task;
-import com.example.outsourcingproject.domain.task.repository.TaskRepository;
+
 import com.example.outsourcingproject.domain.user.entity.User;
 import com.example.outsourcingproject.domain.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.scheduling.config.Task;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 

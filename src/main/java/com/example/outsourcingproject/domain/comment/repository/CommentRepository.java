@@ -1,9 +1,9 @@
 package com.example.outsourcingproject.domain.comment.repository;
 
 import com.example.outsourcingproject.domain.comment.entity.Comment;
-import com.example.outsourcingproject.domain.task.entity.Task;
 import com.example.outsourcingproject.domain.user.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.scheduling.config.Task;
 
 import java.util.List;
 import java.util.Optional;
