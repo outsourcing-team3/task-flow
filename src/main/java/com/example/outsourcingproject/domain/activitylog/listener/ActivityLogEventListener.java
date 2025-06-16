@@ -8,6 +8,7 @@ import com.example.outsourcingproject.domain.user.repository.UserRepository;
 import com.example.outsourcingproject.global.aop.event.dto.ActivityLogEventDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.event.EventListener;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -16,6 +17,7 @@ public class ActivityLogEventListener {
     private final UserRepository userRepository;
     private final ActivityLogRepository activityLogRepository;
 
+    @Async
     @EventListener
     public void handleActivityLogEvent(ActivityLogEventDto event) {
 
