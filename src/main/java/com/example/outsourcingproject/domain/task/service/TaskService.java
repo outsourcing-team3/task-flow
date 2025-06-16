@@ -2,6 +2,7 @@ package com.example.outsourcingproject.domain.task.service;
 
 import com.example.outsourcingproject.domain.task.dto.TaskCreateRequestDto;
 import com.example.outsourcingproject.domain.task.dto.TaskCreateResponseDto;
+import com.example.outsourcingproject.domain.task.dto.TaskReadResponseDto;
 import com.example.outsourcingproject.domain.task.entity.Task;
 import com.example.outsourcingproject.domain.task.repository.TaskRepository;
 import com.example.outsourcingproject.domain.user.entity.User;
@@ -14,6 +15,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Slf4j
@@ -24,6 +26,8 @@ public class TaskService {
     private final TaskRepository taskRepository;
     private final UserRepository userRepository;
 
+
+    // Task 생성
     public TaskCreateResponseDto createTask (Long currentUserId, TaskCreateRequestDto requestDto) {
 
         // Task 생성자 = 로그인 유저 검증
@@ -66,6 +70,18 @@ public class TaskService {
         taskRepository.save((newTask));
 
         return TaskCreateResponseDto.toDto(newTask);
+    }
+
+    // Task 조회 - 전체
+    public List<TaskReadResponseDto> getAllTasks() {
+        return taskRepository.findAllByIsDeletedFalse().stream().map(TaskReadResponseDto::toDto).toList();
+    }
+
+    // Task 조회 - 단 건
+    public TaskReadResponseDto getTaskById(Long taskId) {
+        Task task = taskRepository.findByIdAndIsDeletedFalse(taskId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Task not found"));
+
+        return TaskReadResponseDto.toDto(task);
     }
 
 
