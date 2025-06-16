@@ -17,6 +17,9 @@ public class Auth extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false, length = 50)
+    private String name;
+
     @Column(unique = true, nullable = false, length = 20)
     private String username;
 
@@ -30,7 +33,8 @@ public class Auth extends BaseEntity {
     @Column(nullable = false, length = 20)
     private UserRole role;
 
-    public Auth(String username, String email, String password, UserRole role) {
+    public Auth(String name, String username, String email, String password, UserRole role) {
+        this.name = name;
         this.username = username;
         this.email = email;
         this.password = password;

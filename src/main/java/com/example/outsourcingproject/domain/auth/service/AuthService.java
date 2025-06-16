@@ -50,16 +50,18 @@ public class AuthService {
         String encodedPassword = passwordEncoder.encode(signupRequest.getPassword());
 
         Auth auth = new Auth(
+                signupRequest.getName(),
                 signupRequest.getUsername(),
                 signupRequest.getEmail(),
                 encodedPassword,
                 userRole
         );
+
         Auth savedAuth = authRepository.save(auth);
 
         eventPublisher.publishEvent(new UserRegisteredEvent(
                 savedAuth.getId(),
-                signupRequest.getName(),
+                savedAuth.getName(),
                 savedAuth.getEmail()
         ));
 

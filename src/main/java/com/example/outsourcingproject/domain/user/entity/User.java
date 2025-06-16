@@ -17,7 +17,7 @@ public class User extends BaseEntity {
     private Long id; // Auth와 동일한 PK
 
     @Column(nullable = false, length = 50)
-    private String name;
+    private String name; // 캐시용
 
     @Column(unique = true, nullable = false, length = 100)
     private String email; // 캐시용
