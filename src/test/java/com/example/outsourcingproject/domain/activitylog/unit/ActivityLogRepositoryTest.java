@@ -1,4 +1,4 @@
-package com.example.outsourcingproject.domain.activitylog;
+package com.example.outsourcingproject.domain.activitylog.unit;
 
 import com.example.outsourcingproject.domain.activitylog.domain.model.ActivityLog;
 import com.example.outsourcingproject.domain.activitylog.domain.repository.ActivityLogRepository;
