@@ -22,11 +22,13 @@ public class TaskCreateResponseDto {
 
     private String creator;
 
+    private LocalDateTime startedAt;
+
     private LocalDateTime createdAt;
 
     private LocalDateTime updatedAt;
 
-    public TaskCreateResponseDto(String title, String description, String status, LocalDateTime deadline, String priority, String assignee, String creator, LocalDateTime createdAt, LocalDateTime updatedAt) {
+    public TaskCreateResponseDto(String title, String description, String status, LocalDateTime deadline, String priority, String assignee, String creator, LocalDateTime startedAt, LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.title = title;
         this.description = description;
         this.status = status;
@@ -34,6 +36,7 @@ public class TaskCreateResponseDto {
         this.priority = priority;
         this.assignee = assignee;
         this.creator = creator;
+        this.startedAt = startedAt;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
@@ -45,8 +48,9 @@ public class TaskCreateResponseDto {
                 task.getStatus(),
                 task.getDeadline(),
                 task.getPriority(),
-                task.getAssignee().getUsername(),
-                task.getCreator().getUsername(),
+                task.getAssignee().getName(),
+                task.getCreator().getName(),
+                task.getStartedAt(),
                 task.getCreatedAt(),
                 task.getUpdatedAt()
         );

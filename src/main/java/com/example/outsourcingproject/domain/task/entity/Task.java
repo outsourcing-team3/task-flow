@@ -35,12 +35,12 @@ public class Task extends BaseEntity {
 
     private String status;
 
-    private LocalDateTime started_at;
+    private LocalDateTime startedAt;
 
     public Task() {
     }
 
-    public Task(String title, String description, String priority, User assignee, User creator, String status, LocalDateTime deadline) {
+    public Task(String title, String description, String priority, User assignee, User creator, String status, LocalDateTime deadline, LocalDateTime startedAt) {
         this.title = title;
         this.description = description;
         this.priority = priority;
@@ -48,5 +48,6 @@ public class Task extends BaseEntity {
         this.creator = creator;
         this.status = status;
         this.deadline = deadline;
+        this.startedAt = startedAt;
     }
 }
