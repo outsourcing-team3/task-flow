@@ -1,4 +1,4 @@
-package com.example.outsourcingproject.config;
+package com.example.outsourcingproject.global.config;
 
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer;

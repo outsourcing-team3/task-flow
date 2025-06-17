@@ -11,7 +11,7 @@ CREATE TABLE auth (
     password VARCHAR(255) NOT NULL COMMENT '패스워드',
     role VARCHAR(20) NOT NULL DEFAULT 'USER' COMMENT '권한',
 
--- BaseEntity 공통 필드들
+    -- BaseEntity 공통 필드들
     is_deleted BOOLEAN NOT NULL DEFAULT FALSE COMMENT '삭제 여부',
     created_at DATETIME NOT NULL COMMENT '생성일',
     updated_at DATETIME NOT NULL COMMENT '수정일',
@@ -32,14 +32,14 @@ CREATE TABLE users (
     name VARCHAR(50) NOT NULL COMMENT '이름',
     email VARCHAR(100) NOT NULL COMMENT '이메일 (캐시용)',
 
--- BaseEntity 공통 필드들
+    -- BaseEntity 공통 필드들
     is_deleted BOOLEAN NOT NULL DEFAULT FALSE COMMENT '삭제 여부',
     created_at DATETIME NOT NULL COMMENT '생성일',
     updated_at DATETIME NOT NULL COMMENT '수정일',
     deleted_at DATETIME COMMENT '삭제일',
 
     PRIMARY KEY (id),
--- 이벤트 기반이므로 FK 제약조건 제거 (데이터 일관성은 애플리케이션에서 보장)
+    -- 이벤트 기반이므로 FK 제약조건 제거 (데이터 일관성은 애플리케이션에서 보장)
     UNIQUE KEY uk_users_email (email),
 
     INDEX idx_users_is_deleted (is_deleted),
@@ -52,7 +52,7 @@ CREATE TABLE refresh_tokens (
     user_id BIGINT NOT NULL COMMENT '유저 ID (FK)',
     expiry_time DATETIME NOT NULL COMMENT '만료 시간',
 
--- BaseEntity 공통 필드들
+    -- BaseEntity 공통 필드들
     created_at DATETIME NOT NULL COMMENT '생성일',
     updated_at DATETIME NOT NULL COMMENT '수정일',
 
@@ -70,7 +70,7 @@ CREATE TABLE token_blacklist (
     user_id BIGINT NOT NULL COMMENT '유저 ID (FK)',
     expiry_time DATETIME NOT NULL COMMENT '만료 시간',
 
--- BaseEntity 공통 필드들 (soft delete, updated_at 불필요)
+    -- BaseEntity 공통 필드들 (soft delete, updated_at 불필요)
     created_at DATETIME NOT NULL COMMENT '생성일',
 
     PRIMARY KEY (id),
@@ -124,29 +124,23 @@ CREATE TABLE comments (
     INDEX idx_comments_user_id (user_id)
 );
 
--- 활동 타입(activity_type) 테이블 생성
-CREATE TABLE activity_types (
-    id BIGINT AUTO_INCREMENT COMMENT '활동 타입 ID (PK)',
-    code VARCHAR(100) NOT NULL UNIQUE COMMENT '타입 코드',
-    label VARCHAR(50) NOT NULL COMMENT '라벨',
-
-    PRIMARY KEY (id)
-) COMMENT = '활동 타입 Table';
-
 -- 활동 로그(activity_logs) 테이블 생성
 CREATE TABLE activity_logs (
     id BIGINT AUTO_INCREMENT COMMENT '활동 로그 ID (PK)',
-    activity_time TIMESTAMP NOT NULL COMMENT '활동 시간',
     user_id BIGINT NULL COMMENT '유저 ID (FK)',
-    target_id BIGINT NULL COMMENT '작업 ID',
-    activity_type_id BIGINT NULL COMMENT '활동 타입 ID (FK)',
-    changes TEXT NULL COMMENT '변경 사항',
+    activity_type VARCHAR(50) NOT NULL COMMENT '활동 타입 Enum 명',
+    target_type VARCHAR(50) NULL COMMENT '타겟 Enum 명',
+    message TEXT COMMENT '작업 내용',
+    request_ip VARCHAR(45),
+    request_method VARCHAR(10),
+    request_url TEXT,
+    created_at DATETIME NOT NULL COMMENT '생성일',
 
     PRIMARY KEY (id),
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL,
-    FOREIGN KEY (activity_type_id) REFERENCES activity_types(id) ON DELETE SET NULL,
 
     INDEX idx_logs_user_id (user_id),
-    INDEX idx_logs_task_id (target_id),
-    INDEX idx_logs_activity_type_id (activity_type_id)
+    INDEX idx_logs_activity_type_id (activity_type),
+    INDEX idx_logs_task_id (target_type),
+    INDEX idx_logs_created_at (created_at)
 ) COMMENT = '활동 로그 Table';
