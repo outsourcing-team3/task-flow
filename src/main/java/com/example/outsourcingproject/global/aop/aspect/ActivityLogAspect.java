@@ -70,10 +70,20 @@ public class ActivityLogAspect {
             return result;
         }
 
+        String message = null;
+        // TODO: Task 상태 변경 시 로직 추가 필요
+//        if(logActivity.type().equals(ActivityType.TASK_STATUS_CHANGED){
+//
+//            message = String.format(ActivityType.TASK_STATUS_CHANGED.getMessage1(), )
+//        } else {
+//
+//        }
+
         ActivityLogEventDto activityLogEventDto = new ActivityLogEventDto(
                 userId,
                 logActivity.type(),
                 logActivity.target(),
+                logActivity.type().getMessage1(),
                 httpServletRequest.getRemoteAddr(),
                 RequestMethod.valueOf(httpServletRequest.getMethod()),
                 httpServletRequest.getRequestURI()

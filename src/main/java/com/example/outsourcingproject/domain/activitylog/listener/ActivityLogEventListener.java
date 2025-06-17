@@ -2,9 +2,9 @@ package com.example.outsourcingproject.domain.activitylog.listener;
 
 import com.example.outsourcingproject.domain.activitylog.domain.model.ActivityLog;
 import com.example.outsourcingproject.domain.activitylog.domain.repository.ActivityLogRepository;
+import com.example.outsourcingproject.domain.auth.entity.Auth;
 import com.example.outsourcingproject.domain.auth.exception.UserNotFoundException;
-import com.example.outsourcingproject.domain.user.entity.User;
-import com.example.outsourcingproject.domain.user.repository.UserRepository;
+import com.example.outsourcingproject.domain.auth.repository.AuthRepository;
 import com.example.outsourcingproject.global.aop.event.dto.ActivityLogEventDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.event.EventListener;
@@ -28,7 +28,7 @@ public class ActivityLogEventListener {
                 user,
                 event.getActivityType(),
                 event.getTargetType(),
-                "메세지",
+                event.getMessage(),
                 event.getRequestIp(),
                 event.getRequestMethod(),
                 event.getRequestUrl()
