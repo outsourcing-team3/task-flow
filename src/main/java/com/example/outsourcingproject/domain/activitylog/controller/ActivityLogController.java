@@ -27,14 +27,14 @@ public class ActivityLogController {
 
     private final ActivityLogService activityLogService;
 
-    @GetMapping("/activity-logs")
+    @GetMapping("/activities")
     public ResponseEntity<ApiResponse<PagedResponse<ActivityLogResponseDto>>> findAll(
             @RequestParam(defaultValue = "1") @Min(1) int page,
             @RequestParam(defaultValue = "10") @Min(1) int size,
 
             @RequestParam(required = false) Long userId,
-            @RequestParam(required = false) String activityType,
-            @RequestParam(required = false) Integer targetId,
+            @RequestParam(required = false) String type,    // ActivityType
+            @RequestParam(required = false) String taskId,
 
             @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startDate,
             @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endDate
@@ -44,8 +44,8 @@ public class ActivityLogController {
         FindAllOptionDto findAllOptionDto = new FindAllOptionDto(
                 pageable,
                 userId,
-                activityType,
-                targetId,
+                type,
+                taskId != null ? Integer.parseInt(taskId) : null,
                 startDate,
                 endDate
         );
