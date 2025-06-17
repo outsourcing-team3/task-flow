@@ -76,10 +76,24 @@ public class TaskService {
         return TaskCreateResponseDto.toDto(newTask);
     }
 
-    // Task 조회 - 전체
-    public List<TaskReadResponseDto> getAllTasks() {
-        return taskRepository.findAllByIsDeletedFalse().stream().map(TaskReadResponseDto::toDto).toList();
+    // Task 조회 - 전체 (기존)
+//    public List<TaskReadResponseDto> getAllTasks() {
+//        return taskRepository.findAllByIsDeletedFalse().stream().map(TaskReadResponseDto::toDto).toList();
+//    }
+
+    public List<TaskReadResponseDto> getTasksByStatus(Optional<TaskStatus> status) {
+        List<Task> tasks;
+
+        // Status 값이 있을 경우 해당 Status 에 맞는 Task 조회
+        if (status.isPresent()) {
+            tasks = taskRepository.findAllByIsDeletedFalseAndStatus(status.get());
+        } else { // Status 값이 없을 경우 모든 Task 조회
+            tasks = taskRepository.findAllByIsDeletedFalse();
+        }
+
+        return tasks.stream().map(TaskReadResponseDto::toDto).toList();
     }
+
 
     // Task 조회 - 단 건
     public TaskReadResponseDto getTaskById(Long taskId) {
