@@ -52,14 +52,14 @@ public class ActivityLogAspect {
         }
 
         // 로그인 시 응답 헤더에서 id 추출
-        if(logActivity.type().equals(ActivityType.USER_LOGGED_IN)) {
-            HttpHeaders headers = result.getHeaders();
-            String bearerToken = headers.getFirst("Authorization");
-            String token = Objects.requireNonNull(bearerToken).substring(7);
-
-            Claims claims = jwtTokenProvider.parseToken(token);
-            userId = Long.parseLong(claims.getSubject());
-        }
+//        if(logActivity.type().equals(ActivityType.USER_LOGGED_IN)) {
+//            HttpHeaders headers = result.getHeaders();
+//            String bearerToken = headers.getFirst("Authorization");
+//            String token = Objects.requireNonNull(bearerToken).substring(7);
+//
+//            Claims claims = jwtTokenProvider.parseToken(token);
+//            userId = Long.parseLong(claims.getSubject());
+//        }
 
         if(userId == null) {
             // 인증 없는 요청이면 일단 넘김
