@@ -7,7 +7,10 @@ import com.example.outsourcingproject.domain.auth.dto.request.WithdrawRequestDto
 import com.example.outsourcingproject.domain.auth.dto.response.SigninResponseDto;
 import com.example.outsourcingproject.domain.auth.dto.response.SignupResponseDto;
 import com.example.outsourcingproject.domain.auth.service.AuthService;
+import com.example.outsourcingproject.global.aop.annotation.LogActivity;
 import com.example.outsourcingproject.global.dto.ApiResponse;
+import com.example.outsourcingproject.global.enums.ActivityType;
+import com.example.outsourcingproject.global.enums.TargetType;
 import com.example.outsourcingproject.global.security.JwtAuthenticationProvider;
 import com.example.outsourcingproject.global.security.UserPrincipal;
 import jakarta.servlet.http.HttpServletRequest;
@@ -32,6 +35,7 @@ public class AuthController {
         return ResponseEntity.ok(ApiResponse.success(response, "회원가입이 완료되었습니다."));
     }
 
+    @LogActivity(target = TargetType.USER, type = ActivityType.USER_LOGGED_IN)
     @PostMapping("/auth/login")
     public ResponseEntity<ApiResponse<SigninResponseDto>> signin(@Valid @RequestBody SigninRequestDto signinRequest) {
         SigninResponseDto response = authService.signin(signinRequest);
@@ -51,6 +55,7 @@ public class AuthController {
                 .body(ApiResponse.success("토큰이 갱신되었습니다."));
     }
 
+    @LogActivity(target = TargetType.USER, type = ActivityType.USER_LOGGED_OUT)
     @PostMapping("/auth/logout")
     public ResponseEntity<ApiResponse<Void>> logout(@AuthenticationPrincipal UserPrincipal userPrincipal,
                                                     HttpServletRequest request) {
