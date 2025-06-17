@@ -65,8 +65,8 @@ CREATE TABLE refresh_tokens (
 );
 
 CREATE TABLE token_blacklist (
-    id BIGINT NOT NULL AUTO_INCREMENT COMMENT '리프레시 토큰 ID',
-    token VARCHAR(500) NOT NULL COMMENT '토큰 값',
+    id BIGINT NOT NULL AUTO_INCREMENT COMMENT '토큰 블랙리스트 ID',
+    jti VARCHAR(36) NOT NULL COMMENT 'JWT ID (JTI)',
     user_id BIGINT NOT NULL COMMENT '유저 ID (FK)',
     expiry_time DATETIME NOT NULL COMMENT '만료 시간',
 
@@ -74,7 +74,7 @@ CREATE TABLE token_blacklist (
     created_at DATETIME NOT NULL COMMENT '생성일',
 
     PRIMARY KEY (id),
-    UNIQUE KEY uk_token_blacklist_token (token),
+    UNIQUE KEY uk_token_blacklist_jti (jti),
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE,
 
     INDEX idx_token_blacklist_user_id (user_id),
