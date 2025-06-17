@@ -29,7 +29,7 @@ public class ActivityLogService {
         }
 
         ActivityType activityType = ActivityType.of(option.getActivityType()).orElse(null);
-        TargetType targetType = TargetType.fromId(option.getTargetId()).orElse(null);
+        TargetType targetType = TargetType.fromId(option.getTaskId()).orElse(null);
 
         LocalDateTime startDateTime = option.getStartDate() != null ? option.getStartDate().atStartOfDay() : null;
         LocalDateTime endDateTime = option.getEndDate() != null ? option.getEndDate().atTime(LocalTime.MAX) : null;
