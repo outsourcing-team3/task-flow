@@ -26,13 +26,13 @@ public class AuthController {
     private final AuthService authService;
     private final JwtAuthenticationProvider jwtAuthenticationProvider;
 
-    @PostMapping("/auth/signup")
+    @PostMapping("/auth/register")
     public ResponseEntity<ApiResponse<SignupResponseDto>> signup(@Valid @RequestBody SignupRequestDto signupRequest) {
         SignupResponseDto response = authService.signup(signupRequest);
         return ResponseEntity.ok(ApiResponse.success(response, "회원가입이 완료되었습니다."));
     }
 
-    @PostMapping("/auth/signin")
+    @PostMapping("/auth/login")
     public ResponseEntity<ApiResponse<SigninResponseDto>> signin(@Valid @RequestBody SigninRequestDto signinRequest) {
         SigninResponseDto response = authService.signin(signinRequest);
         return ResponseEntity.ok()
