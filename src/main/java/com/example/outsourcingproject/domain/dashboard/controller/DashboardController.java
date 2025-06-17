@@ -28,9 +28,8 @@ public class DashboardController {
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
 
         if (from.isAfter(to)) {
-            throw new IllegalArgumentException("'from' must be before 'to'");
+            throw new IllegalArgumentException("'from'은 'to' 이전이어야 합니다.");
         }
-
 
         return ApiResponse.success(dashboardService.getStatistics(from, to), "통계 조회 성공");
     }
@@ -42,17 +41,12 @@ public class DashboardController {
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
     ) {
 
-
-        List<TaskSimpleResponseDto> myTasks = dashboardService.getMyTasksByDate(userPrincipal.getId(), date);
-
-        return ApiResponse.success(myTasks, "나의 태스크 조회 성공");
+        return ApiResponse.success(dashboardService.getMyTasksByDate(userPrincipal.getId(), date), "나의 태스크 조회 성공");
     }
 
     @GetMapping("/dashboard/trend/week")
     public ApiResponse<List<DailyTaskTrendDto>> weeklyTrend() {
-        List<DailyTaskTrendDto> data =
-                dashboardService.getWeeklyTrend(LocalDate.now());
-        return ApiResponse.success(data, "주간 트렌드 조회 성공");
+        return ApiResponse.success(dashboardService.getWeeklyTrend(LocalDate.now()), "주간 트렌드 조회 성공");
     }
 
     @GetMapping("/dashboard/status-ratio")
@@ -61,20 +55,22 @@ public class DashboardController {
     }
 
 
-    @GetMapping("/progress-ratio")
+    @GetMapping("/dashboard/progress-ratio")
     public ApiResponse<ProgressRatioDto> progressRatio(
             @AuthenticationPrincipal UserPrincipal userPrincipal) {
-
-        ProgressRatioDto dto = dashboardService.getProgressRatio(userPrincipal.getId());
-        return ApiResponse.success(dto, "진행률 통계 조회 성공");
+        return ApiResponse.success(dashboardService.getProgressRatio(userPrincipal.getId()), "진행률 통계 조회 성공");
     }
 
 
-    @GetMapping("/trend/month")
+    @GetMapping("/dashboard/trend/month")
     public ApiResponse<List<MonthlyTaskTrendDto>> monthTrend() {
-        return ApiResponse.success(
-                dashboardService.getMonthlyTrend(), "월간 작업 추세"
-               );
+        return ApiResponse.success(dashboardService.getMonthlyTrend(), "월간 작업 추세");
+    }
+
+
+    @GetMapping("/dashboard/activity-feed")
+    public ApiResponse<List<ActivityFeedDto>> feed() {
+        return ApiResponse.success(dashboardService.getAcitivityFeed(), "활동 피드를 조회했습니다.");
     }
 
 }

@@ -45,6 +45,7 @@ public interface TaskStatisticsRepository extends JpaRepository<Task, Long> {
                                 @Param("from") LocalDateTime from,
                                 @Param("to") LocalDateTime to);
 
+
     //특정 유저의 해당 날짜 마감인 태스크 목록 조회
     @Query("""
             SELECT t 

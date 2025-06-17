@@ -1,6 +1,7 @@
 package com.example.outsourcingproject.domain.dashboard.service;
 
 import com.example.outsourcingproject.domain.dashboard.dto.*;
+import com.example.outsourcingproject.domain.dashboard.repository.AcitivityFeedRepository;
 import com.example.outsourcingproject.domain.dashboard.repository.TaskStatisticsRepository;
 import com.example.outsourcingproject.domain.task.dto.TaskSimpleResponseDto;
 import com.example.outsourcingproject.domain.task.entity.Task;
@@ -28,9 +29,11 @@ import java.util.stream.Collectors;
 public class DashboardService {
 
     private final TaskStatisticsRepository taskStatisticsRepository;
+    private final AcitivityFeedRepository acitivityFeedRepository;
 
 
     public DashboardStatisticsDto getStatistics(LocalDate from, LocalDate to) {
+
         LocalDateTime start = from.atStartOfDay();
         LocalDateTime end = to.plusDays(1).atStartOfDay();
 
@@ -38,10 +41,7 @@ public class DashboardService {
         long todo = taskStatisticsRepository.countByStatusAndPeriod(TaskStatus.TODO, start, end);
         long inProgress = taskStatisticsRepository.countByStatusAndPeriod(TaskStatus.IN_PROGRESS, start, end);
         long done = taskStatisticsRepository.countByStatusAndPeriod(TaskStatus.DONE, start, end);
-
-        long overdue = taskStatisticsRepository.countOverdueTasks(
-                List.of(TaskStatus.TODO, TaskStatus.IN_PROGRESS),
-                LocalDateTime.now());
+        long overdue = taskStatisticsRepository.countOverdueTasks(List.of(TaskStatus.TODO, TaskStatus.IN_PROGRESS), LocalDateTime.now());
 
         double completionRate = rate(done, total);
         double inProgressRate = rate(inProgress, total);
@@ -64,15 +64,14 @@ public class DashboardService {
                 ? (thisWeekCount > 0 ? 100.0 : 0.0)
                 : Math.round((thisWeekCount - lastWeekCount) * 10000.0 / lastWeekCount) / 100.0;
 
-
         return DashboardStatisticsDto.of(
                 total,
-                done,
                 weeklyChangeRate,
+                done,
+                completionRate,
                 inProgress,
                 inProgressRate,
                 todo,
-                completionRate,
                 overdue,
                 overdueRate
         );
@@ -80,9 +79,9 @@ public class DashboardService {
     }
 
 
-    private double rate(long part, long all) {
-        if (all == 0) return 0;
-        return Math.round(part * 10000.0 / all) / 100.0; // 소수점 둘째 자리
+    private double rate(long part, long total) {
+        if (total == 0) return 0;
+        return Math.round(part * 10000.0 / total) / 100.0; // 소수점 둘째 자리
     }
 
 
@@ -112,6 +111,7 @@ public class DashboardService {
 
     }
 
+    //작업 상태
     public TaskStatusRatioDto getStatusRatio() {
 
         List<TaskStatusCountDto> result = taskStatisticsRepository.countGroupByStatus();
@@ -130,6 +130,7 @@ public class DashboardService {
 
     }
 
+    //진행률 계산
     public ProgressRatioDto getProgressRatio(Long userId) {
 
         //내 상태별 카운트
@@ -161,10 +162,10 @@ public class DashboardService {
                             TaskStatusCountDto::getStatus,
                             TaskStatusCountDto::getCount));
 
-
     }
 
 
+    //월별 추세 구하기
     public List<MonthlyTaskTrendDto> getMonthlyTrend() {
         int year = Year.now().getValue();
         List<MonthlyTaskTrendDto> result = taskStatisticsRepository.fetchFixedMonthlyTrend(year);
@@ -176,11 +177,20 @@ public class DashboardService {
                 ));
 
         List<MonthlyTaskTrendDto> fullYear = new ArrayList<>();
+
         for (int m = 1; m <= 12; m++) {
             fullYear.add(map.getOrDefault(m, MonthlyTaskTrendDto.of(m, 0, 0)));
         }
 
         return fullYear;
+
+    }
+
+
+    public List<ActivityFeedDto> getAcitivityFeed(){
+        LocalDateTime to = LocalDateTime.now();
+        LocalDateTime from = to.minusDays(7);
+        return acitivityFeedRepository.fetchFeed(from, to);
 
     }
 
