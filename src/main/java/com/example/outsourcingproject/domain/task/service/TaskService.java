@@ -3,6 +3,7 @@ package com.example.outsourcingproject.domain.task.service;
 import com.example.outsourcingproject.domain.task.dto.TaskCreateRequestDto;
 import com.example.outsourcingproject.domain.task.dto.TaskCreateResponseDto;
 import com.example.outsourcingproject.domain.task.dto.TaskReadResponseDto;
+import com.example.outsourcingproject.domain.task.dto.TaskUpdateRequestDto;
 import com.example.outsourcingproject.domain.task.entity.Task;
 import com.example.outsourcingproject.domain.task.repository.TaskRepository;
 import com.example.outsourcingproject.domain.user.entity.User;
@@ -85,4 +86,45 @@ public class TaskService {
     }
 
 
+    // 특정 Task 수정 - 내용 수정
+    public TaskReadResponseDto updateTask(Long taskId, TaskUpdateRequestDto requestDto, Long currentUserId) {
+        Task task = taskRepository.findByIdAndIsDeletedFalse(taskId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Does not exist id = " + currentUserId));
+
+        User assignee = Optional.ofNullable(requestDto.getAssigneeName())
+                .map(this::findUserName)
+                .orElse(task.getAssignee());
+
+        // 새 값이 있을 경우만 업데이트하기
+        String title = Optional.ofNullable(requestDto.getTitle()).orElse(task.getTitle());
+        String description = Optional.ofNullable(requestDto.getDescription()).orElse(task.getDescription());
+        String priority = Optional.ofNullable(requestDto.getPriority()).orElse(task.getPriority());
+        LocalDateTime deadline = Optional.ofNullable(requestDto.getDeadline()).orElse(task.getDeadline());
+        LocalDateTime startedAt = Optional.ofNullable(requestDto.getStartedAt()).orElse(task.getStartedAt());
+
+        Task updateTask = new Task(
+                title,
+                description,
+                priority,
+                assignee,
+                task.getCreator(),
+                task.getStatus(),
+                deadline,
+                startedAt
+        );
+
+        taskRepository.save(updateTask);
+
+        return TaskReadResponseDto.toDto(updateTask);
+    }
+
+    // name 으로 User 찾기
+    private User findUserName(String assigneeName) {
+        return userRepository.findAll().stream()
+                .filter(user -> user.getName().equals(assigneeName))
+                .findFirst()
+                .orElseThrow(() -> {
+                    log.warn("유저 이름 '{}'에 해당하는 ID 없음", assigneeName);
+                    return new ResponseStatusException(HttpStatus.NOT_FOUND, "Assignee name not found: " + assigneeName);
+                });
+    }
 }
