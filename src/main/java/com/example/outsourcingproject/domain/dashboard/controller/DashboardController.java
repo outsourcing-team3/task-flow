@@ -2,7 +2,7 @@ package com.example.outsourcingproject.domain.dashboard.controller;
 
 
 import com.example.outsourcingproject.domain.dashboard.dto.*;
-import com.example.outsourcingproject.domain.task.dto.TaskSimpleResponseDto;
+import com.example.outsourcingproject.domain.task.dto.TodayTaskItemDto;
 import com.example.outsourcingproject.global.dto.ApiResponse;
 import com.example.outsourcingproject.domain.dashboard.service.DashboardService;
 import com.example.outsourcingproject.global.security.UserPrincipal;
@@ -24,25 +24,26 @@ public class DashboardController {
 
     @GetMapping("/dashboard/statistics")
     public ApiResponse<DashboardStatisticsDto> statistics(
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
-
-        if (from.isAfter(to)) {
-            throw new IllegalArgumentException("'from'은 'to' 이전이어야 합니다.");
-        }
-
-        return ApiResponse.success(dashboardService.getStatistics(from, to), "통계 조회 성공");
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+        return ApiResponse.success(dashboardService.getWeeklyStatistics(date), "통계 조회 성공");
     }
 
 
     @GetMapping("/dashboard/my-tasks")
-    public ApiResponse<List<TaskSimpleResponseDto>> getMyTaskByDate(
-            @AuthenticationPrincipal UserPrincipal userPrincipal,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
-    ) {
+    public ApiResponse<List<TodayTaskItemDto>> getMyTodayTasks(
+            @AuthenticationPrincipal UserPrincipal principal) {
 
-        return ApiResponse.success(dashboardService.getMyTasksByDate(userPrincipal.getId(), date), "나의 태스크 조회 성공");
+        return ApiResponse.success(dashboardService.getMyTodayTasks(principal.getId()), "오늘의 태스크 조회 성공");
     }
+
+//    @GetMapping("/dashboard/my-tasks")
+//    public ApiResponse<List<TodayTaskItemDto>> getMyTaskByDate(
+//            @AuthenticationPrincipal UserPrincipal userPrincipal,
+//            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
+//    ) {
+//
+//        return ApiResponse.success(dashboardService.getMyTasksByDate(userPrincipal.getId(), date), "나의 태스크 조회 성공");
+//    }
 
     @GetMapping("/dashboard/trend/week")
     public ApiResponse<List<DailyTaskTrendDto>> weeklyTrend() {

@@ -3,9 +3,11 @@ package com.example.outsourcingproject.domain.dashboard.service;
 import com.example.outsourcingproject.domain.dashboard.dto.*;
 import com.example.outsourcingproject.domain.dashboard.repository.AcitivityFeedRepository;
 import com.example.outsourcingproject.domain.dashboard.repository.TaskStatisticsRepository;
-import com.example.outsourcingproject.domain.task.dto.TaskSimpleResponseDto;
+import com.example.outsourcingproject.domain.task.dto.TodayTaskItemDto;
 import com.example.outsourcingproject.domain.task.entity.Task;
 import com.example.outsourcingproject.domain.task.enums.TaskStatus;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
 
 
 import lombok.RequiredArgsConstructor;
@@ -15,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Year;
@@ -32,37 +35,37 @@ public class DashboardService {
     private final AcitivityFeedRepository acitivityFeedRepository;
 
 
-    public DashboardStatisticsDto getStatistics(LocalDate from, LocalDate to) {
+    /**
+     * 기준일(date)을 포함한 주(월~일)와 그 전 주를 비교해 통계와 주간 증감률을 반환.
+     */
+    public DashboardStatisticsDto getWeeklyStatistics(LocalDate date) {
 
-        LocalDateTime start = from.atStartOfDay();
-        LocalDateTime end = to.plusDays(1).atStartOfDay();
+        LocalDate monday           = date.with(DayOfWeek.MONDAY);
+        LocalDateTime weekStart    = monday.atStartOfDay();
+        LocalDateTime weekEnd      = monday.plusWeeks(1).atStartOfDay();
 
-        long total = taskStatisticsRepository.countByCreatedAtBetween(start, end);
-        long todo = taskStatisticsRepository.countByStatusAndPeriod(TaskStatus.TODO, start, end);
-        long inProgress = taskStatisticsRepository.countByStatusAndPeriod(TaskStatus.IN_PROGRESS, start, end);
-        long done = taskStatisticsRepository.countByStatusAndPeriod(TaskStatus.DONE, start, end);
-        long overdue = taskStatisticsRepository.countOverdueTasks(List.of(TaskStatus.TODO, TaskStatus.IN_PROGRESS), LocalDateTime.now());
 
-        double completionRate = rate(done, total);
-        double inProgressRate = rate(inProgress, total);
-        double overdueRate = rate(overdue, total);
+        LocalDateTime prevWeekStart = monday.minusWeeks(1).atStartOfDay();
+        LocalDateTime prevWeekEnd   = weekStart;
+
+        long total      = taskStatisticsRepository.countByCreatedAtBetween(weekStart, weekEnd);
+        long todo       = taskStatisticsRepository.countByStatusAndPeriod(TaskStatus.TODO,        weekStart, weekEnd);
+        long inProgress = taskStatisticsRepository.countByStatusAndPeriod(TaskStatus.IN_PROGRESS, weekStart, weekEnd);
+        long done       = taskStatisticsRepository.countByStatusAndPeriod(TaskStatus.DONE,        weekStart, weekEnd);
+        long overdue    = taskStatisticsRepository.countOverdueTasks(List.of(TaskStatus.TODO, TaskStatus.IN_PROGRESS), LocalDateTime.now());
+
+        double completionRate  = rate(done, total);
+        double inProgressRate  = rate(inProgress, total);
+        double overdueRate     = rate(overdue, total);
 
 
         //주간 증가율 계산
 
-        LocalDateTime thisWeekStart = to.minusDays(6).atStartOfDay();
-        LocalDateTime thisWeekEnd = to.plusDays(1).atStartOfDay();
-        LocalDateTime lastWeekStart = thisWeekStart.minusDays(7);
-        LocalDateTime lastWeekEnd = thisWeekStart;
+        long lastWeekTotal = taskStatisticsRepository.countByCreatedAtBetween(prevWeekStart, prevWeekEnd);
 
-        long thisWeekCount = taskStatisticsRepository.countByCreatedAtBetween(thisWeekStart, thisWeekEnd);
-        long lastWeekCount = taskStatisticsRepository.countByCreatedAtBetween(lastWeekStart, lastWeekEnd);
-
-
-        //((이번주 개수 - 지난 주 개수)/ 지난 주 개수) * 100
-        double weeklyChangeRate = (lastWeekCount == 0)
-                ? (thisWeekCount > 0 ? 100.0 : 0.0)
-                : Math.round((thisWeekCount - lastWeekCount) * 10000.0 / lastWeekCount) / 100.0;
+        double weeklyChangeRate = (lastWeekTotal == 0)
+                ? (total > 0 ? 100.0 : 0.0)
+                : Math.round((total - lastWeekTotal) * 10000.0 / lastWeekTotal) / 100.0;
 
         return DashboardStatisticsDto.of(
                 total,
@@ -75,26 +78,43 @@ public class DashboardService {
                 overdue,
                 overdueRate
         );
-
     }
+
 
 
     private double rate(long part, long total) {
-        if (total == 0) return 0;
-        return Math.round(part * 10000.0 / total) / 100.0; // 소수점 둘째 자리
+        return (total == 0) ? 0.0 : Math.round(part * 10000.0 / total) / 100.0;
     }
 
 
-    public List<TaskSimpleResponseDto> getMyTasksByDate(Long userId, LocalDate date) {
-        List<Task> tasks = taskStatisticsRepository.findAllByUserIdAndDate(
+
+    public List<TodayTaskItemDto> getMyTodayTasks(Long userId){
+        LocalDate today = LocalDate.now();
+        LocalDateTime start = today.atStartOfDay();
+        LocalDateTime end = today.plusDays(1).atStartOfDay();
+
+        Pageable topFive = PageRequest.of(0, 5);
+
+        return taskStatisticsRepository.findTodayTasks(
                 userId,
-                date,
-                List.of(TaskStatus.TODO, TaskStatus.IN_PROGRESS));
-        return tasks.stream()
-                .map(TaskSimpleResponseDto::from)
-                .collect(Collectors.toList());
+                List.of(TaskStatus.TODO, TaskStatus.IN_PROGRESS),
+                start, end,
+                topFive
+        );
 
     }
+
+//
+//    public List<TodayTaskItemDto> getMyTasksByDate(Long userId, LocalDate date) {
+//        List<Task> tasks = taskStatisticsRepository.findAllByUserIdAndDate(
+//                userId,
+//                date,
+//                List.of(TaskStatus.TODO, TaskStatus.IN_PROGRESS));
+//        return tasks.stream()
+//                .map(TodayTaskItemDto::from)
+//                .collect(Collectors.toList());
+//
+//    }
 
 
     //최근 1주(월~일) 트렌드 반환

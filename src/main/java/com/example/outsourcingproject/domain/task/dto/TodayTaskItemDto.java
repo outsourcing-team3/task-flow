@@ -10,15 +10,15 @@ import java.time.LocalDateTime;
 
 @Getter
 @AllArgsConstructor(staticName = "from")
-public class TaskSimpleResponseDto {
+public class TodayTaskItemDto {
     private Long id;
     private String title;
     private TaskStatus status;
     private Priority priority;
     private LocalDateTime deadline;
 
-    public static TaskSimpleResponseDto from(Task task) {
-        return new TaskSimpleResponseDto(
+    public static TodayTaskItemDto from(Task task) {
+        return new TodayTaskItemDto(
                 task.getId(),
                 task.getTitle(),
                 task.getStatus(),

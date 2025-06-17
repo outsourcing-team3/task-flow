@@ -3,12 +3,14 @@ package com.example.outsourcingproject.domain.dashboard.repository;
 import com.example.outsourcingproject.domain.dashboard.dto.DailyTaskTrendDto;
 import com.example.outsourcingproject.domain.dashboard.dto.MonthlyTaskTrendDto;
 import com.example.outsourcingproject.domain.dashboard.dto.TaskStatusCountDto;
+import com.example.outsourcingproject.domain.task.dto.TodayTaskItemDto;
 import com.example.outsourcingproject.domain.task.entity.Task;
 import com.example.outsourcingproject.domain.task.enums.TaskStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -46,18 +48,39 @@ public interface TaskStatisticsRepository extends JpaRepository<Task, Long> {
                                 @Param("to") LocalDateTime to);
 
 
-    //특정 유저의 해당 날짜 마감인 태스크 목록 조회
-    @Query("""
-            SELECT t 
-            FROM Task t 
-            WHERE t.assigneeId = :userId 
-            AND DATE(t.deadline) = :date 
-            AND t.status IN (:statuses)
-            AND t.isDeleted = false
-                        """)
-    List<Task> findAllByUserIdAndDate(@Param("userId") Long userId,
-                                      @Param("date") LocalDate date,
-                                      @Param("statuses") List<TaskStatus> statuses);
+   @Query("""
+        SELECT new com.example.outsourcingproject.domain.task.dto.TodayTaskItemDto(
+                t.id, t.title, t.status, t.priority, t.deadline)
+        FROM Task t
+        WHERE t.assigneeId = :userId
+         AND t.isDeleted = false
+         AND t.status IN (:statuses)
+         AND t.deadline BETWEEN :start AND :end
+        ORDER BY t.deadline ASC 
+        """)
+   List<TodayTaskItemDto> findTodayTasks(
+           @Param("userId") Long userId,
+           @Param("statuses") List<TaskStatus> statuses,
+           @Param("start") LocalDateTime start,
+           @Param("end")   LocalDateTime end,
+           Pageable pageable
+   );
+
+
+
+
+//
+//    @Query("""
+//            SELECT t
+//            FROM Task t
+//            WHERE t.assigneeId = :userId
+//            AND DATE(t.deadline) = :date
+//            AND t.status IN (:statuses)
+//            AND t.isDeleted = false
+//                        """)
+//    List<Task> findAllByUserIdAndDate(@Param("userId") Long userId,
+//                                      @Param("date") LocalDate date,
+//                                      @Param("statuses") List<TaskStatus> statuses);
 
 
     //마감기한이 지난 작업 개수
