@@ -1,12 +1,15 @@
 package com.example.outsourcingproject.domain.task.dto;
 
 import com.example.outsourcingproject.domain.task.entity.Task;
+import com.example.outsourcingproject.domain.task.enums.TaskStatus;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
 
 @Getter
 public class TaskReadResponseDto {
+
+    private Long taskId;
 
     private String title;
 
@@ -28,10 +31,11 @@ public class TaskReadResponseDto {
 
     private LocalDateTime updatedAt;
 
-    public TaskReadResponseDto(String title, String description, String status, LocalDateTime deadline, String priority, String assignee, String creator, LocalDateTime startedAt, LocalDateTime createdAt, LocalDateTime updatedAt) {
+    public TaskReadResponseDto(Long taskId, String title, String description, TaskStatus status, LocalDateTime deadline, String priority, String assignee, String creator, LocalDateTime startedAt, LocalDateTime createdAt, LocalDateTime updatedAt) {
+        this.taskId = taskId;
         this.title = title;
         this.description = description;
-        this.status = status;
+        this.status = status.name();
         this.deadline = deadline;
         this.priority = priority;
         this.assignee = assignee;
@@ -43,6 +47,7 @@ public class TaskReadResponseDto {
 
     public static TaskReadResponseDto toDto(Task task) {
         return new TaskReadResponseDto(
+                task.getId(),
                 task.getTitle(),
                 task.getDescription(),
                 task.getStatus(),
