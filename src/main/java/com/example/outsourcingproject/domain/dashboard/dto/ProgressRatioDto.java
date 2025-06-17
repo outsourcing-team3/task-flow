@@ -6,7 +6,6 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor(staticName = "of")
 public class ProgressRatioDto {
-    private double myProgressRate;
-    private double teamProgressRate;
-
+    private  double myRate;
+    private double teamRate;
 }
