@@ -1,6 +1,7 @@
 package com.example.outsourcingproject.domain.activitylog.controller;
 
 import com.example.outsourcingproject.domain.activitylog.controller.dto.ActivityLogResponseDto;
+import com.example.outsourcingproject.global.dto.PagedResponse;
 import com.example.outsourcingproject.domain.activitylog.service.ActivityLogService;
 
 import com.example.outsourcingproject.domain.activitylog.service.dto.FindAllOptionDto;
@@ -18,7 +19,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
-import java.util.List;
 
 @RestController
 @RequestMapping
@@ -28,7 +28,7 @@ public class ActivityLogController {
     private final ActivityLogService activityLogService;
 
     @GetMapping("/activity-logs")
-    public ResponseEntity<ApiResponse<List<ActivityLogResponseDto>>> findAll(
+    public ResponseEntity<ApiResponse<PagedResponse<ActivityLogResponseDto>>> findAll(
             @RequestParam(defaultValue = "1") @Min(1) int page,
             @RequestParam(defaultValue = "10") @Min(1) int size,
 
@@ -50,7 +50,7 @@ public class ActivityLogController {
                 endDate
         );
 
-        List<ActivityLogResponseDto> response = activityLogService.findAll(findAllOptionDto);
+        PagedResponse<ActivityLogResponseDto> response = activityLogService.findAll(findAllOptionDto);
         return ResponseEntity.ok(ApiResponse.success(response, "활동 로그 조회가 완료되었습니다."));
     }
 }
