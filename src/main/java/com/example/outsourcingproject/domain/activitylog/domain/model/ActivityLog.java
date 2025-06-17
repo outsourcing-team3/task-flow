@@ -29,7 +29,7 @@ public class ActivityLog {
     private ActivityType activityType;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "target_id", nullable = false)
+    @Column(name = "target_type", nullable = false)
     private TargetType targetType;
 
     private String message;
