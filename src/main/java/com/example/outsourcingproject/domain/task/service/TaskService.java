@@ -147,6 +147,18 @@ public class TaskService {
         return TaskReadResponseDto.toDto(task);
     }
 
+    @Transactional
+    public void deleteTask(Long taskId) {
+        // Task 조회
+        Task task = findTaskById(taskId);
+
+        // Soft Delete
+        task.delete();
+
+        // task 객체 저장 -> 변경 사항 DB 반영
+        taskRepository.save(task);
+    }
+
 
     // name 으로 User 찾기
     private User findUserName(String assigneeName) {

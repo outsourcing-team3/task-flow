@@ -74,5 +74,14 @@ public class TaskController {
         return ResponseEntity.ok(ApiResponse.success(updateTaskStatus, "Task 상태가 [" + updateTaskStatus.getStatus() + "] (으)로 변경되었습니다."));
     }
 
+    @DeleteMapping("/tasks/{taskId}")
+    public ResponseEntity<ApiResponse<String>> deleteTask(@PathVariable Long taskId) {
+        taskService.deleteTask(taskId);
 
+        return ResponseEntity.ok(ApiResponse.success("Task 가 삭제되었습니다."));
+
+//        return ResponseEntity
+//                .status(HttpStatus.NO_CONTENT)
+//                .body(ApiResponse.success("Task 가 삭제되었습니다."));
+    }
 }
