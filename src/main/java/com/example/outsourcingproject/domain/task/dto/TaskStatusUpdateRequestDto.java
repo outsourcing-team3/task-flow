@@ -2,9 +2,6 @@ package com.example.outsourcingproject.domain.task.dto;
 
 import lombok.Getter;
 
-import java.time.LocalDateTime;
-
-
 /**
  * Task 상태 수정 요청 DTO -> TODO / IN_PROGRESS / DONE
  */
