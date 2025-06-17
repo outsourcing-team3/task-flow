@@ -1,8 +1,10 @@
 package com.example.outsourcingproject.global.aop.aspect;
 
+import com.example.outsourcingproject.domain.auth.dto.response.SigninResponseDto;
 import com.example.outsourcingproject.global.aop.annotation.LogActivity;
 import com.example.outsourcingproject.global.aop.event.ActivityLogPublisher;
 import com.example.outsourcingproject.global.aop.event.dto.ActivityLogEventDto;
+import com.example.outsourcingproject.global.dto.ApiResponse;
 import com.example.outsourcingproject.global.enums.ActivityType;
 import com.example.outsourcingproject.global.enums.RequestMethod;
 import com.example.outsourcingproject.global.security.JwtTokenProvider;
@@ -51,14 +53,18 @@ public class ActivityLogAspect {
             }
         }
 
-        // 로그인 시 응답 헤더에서 id 추출
+        // 로그인 시 응답 바디에서 id 추출
         if(logActivity.type().equals(ActivityType.USER_LOGGED_IN)) {
-            HttpHeaders headers = result.getHeaders();
-            String bearerToken = headers.getFirst("Authorization");
-            String token = Objects.requireNonNull(bearerToken).substring(7);
+            Object body = result.getBody();
+            if (body instanceof ApiResponse<?> apiResponse) {
+                Object data = apiResponse.getData();
+                if(data instanceof SigninResponseDto signinResponseDto) {
+                    String token = signinResponseDto.getToken();
 
-            Claims claims = jwtTokenProvider.parseToken(token);
-            userId = Long.parseLong(claims.getSubject());
+                    Claims claims = jwtTokenProvider.parseToken(token);
+                    userId = Long.parseLong(claims.getSubject());
+                }
+            }
         }
 
         if(userId == null) {
