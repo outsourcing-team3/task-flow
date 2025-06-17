@@ -14,18 +14,18 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class ActivityLogEventListener {
-    private final UserRepository userRepository;
+    private final AuthRepository authRepository;
     private final ActivityLogRepository activityLogRepository;
 
     @Async
     @EventListener
     public void handleActivityLogEvent(ActivityLogEventDto event) {
 
-        User user = userRepository.findById(event.getUserId()).orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없습니다."));
+        Auth auth = authRepository.findById(event.getUserId()).orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없습니다."));
 
         // 엔티티로 변환
         ActivityLog activityLog = new ActivityLog(
-                user,
+                auth,
                 event.getActivityType(),
                 event.getTargetType(),
                 event.getMessage(),

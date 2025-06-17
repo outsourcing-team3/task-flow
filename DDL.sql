@@ -140,7 +140,7 @@ CREATE TABLE activity_logs (
     created_at DATETIME NOT NULL COMMENT '생성일',
 
     PRIMARY KEY (id),
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL,
+    FOREIGN KEY (user_id) REFERENCES auth(id) ON DELETE SET NULL,
 
     INDEX idx_logs_user_id (user_id),
     INDEX idx_logs_activity_type_id (activity_type),
