@@ -51,16 +51,13 @@ public class ActivityLogAspect {
             }
         }
 
-        // 로그인 시 응답 바디에서 id 추출
+        // 로그인 시 응답 바디에서 id 값 가져오기
         if(logActivity.type().equals(ActivityType.USER_LOGGED_IN)) {
             Object body = result.getBody();
             if (body instanceof ApiResponse<?> apiResponse) {
                 Object data = apiResponse.getData();
                 if(data instanceof SigninResponseDto signinResponseDto) {
-                    String token = signinResponseDto.getToken();
-
-                    Claims claims = jwtTokenProvider.parseToken(token);
-                    userId = Long.parseLong(claims.getSubject());
+                    userId = signinResponseDto.getUserId();
                 }
             }
         }
