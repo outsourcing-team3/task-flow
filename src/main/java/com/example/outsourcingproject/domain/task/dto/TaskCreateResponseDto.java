@@ -1,6 +1,7 @@
 package com.example.outsourcingproject.domain.task.dto;
 
 import com.example.outsourcingproject.domain.task.entity.Task;
+import com.example.outsourcingproject.domain.task.enums.TaskStatus;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
@@ -28,10 +29,10 @@ public class TaskCreateResponseDto {
 
     private LocalDateTime updatedAt;
 
-    public TaskCreateResponseDto(String title, String description, String status, LocalDateTime deadline, String priority, String assignee, String creator, LocalDateTime startedAt, LocalDateTime createdAt, LocalDateTime updatedAt) {
+    public TaskCreateResponseDto(String title, String description, TaskStatus status, LocalDateTime deadline, String priority, String assignee, String creator, LocalDateTime startedAt, LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.title = title;
         this.description = description;
-        this.status = status;
+        this.status = status.name();
         this.deadline = deadline;
         this.priority = priority;
         this.assignee = assignee;

@@ -1,10 +1,8 @@
 package com.example.outsourcingproject.domain.task.service;
 
-import com.example.outsourcingproject.domain.task.dto.TaskCreateRequestDto;
-import com.example.outsourcingproject.domain.task.dto.TaskCreateResponseDto;
-import com.example.outsourcingproject.domain.task.dto.TaskReadResponseDto;
-import com.example.outsourcingproject.domain.task.dto.TaskUpdateRequestDto;
+import com.example.outsourcingproject.domain.task.dto.*;
 import com.example.outsourcingproject.domain.task.entity.Task;
+import com.example.outsourcingproject.domain.task.enums.TaskStatus;
 import com.example.outsourcingproject.domain.task.repository.TaskRepository;
 import com.example.outsourcingproject.domain.user.entity.User;
 import com.example.outsourcingproject.domain.user.repository.UserRepository;
@@ -12,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
@@ -29,6 +28,7 @@ public class TaskService {
 
 
     // Task 생성
+    @Transactional
     public TaskCreateResponseDto createTask (Long currentUserId, TaskCreateRequestDto requestDto) {
 
         // Task 생성자 = 로그인 유저 검증
@@ -51,6 +51,9 @@ public class TaskService {
         // priority 기본값 처리
         String priority = Optional.ofNullable(requestDto.getPriority()).filter(pr -> !pr.isBlank()).orElse("MEDIUM");
 
+        // status 기본값 처리
+        TaskStatus status = TaskStatus.TODO;
+
         // deadline 기본값 처리
         LocalDateTime deadline = Optional.ofNullable(requestDto.getDeadline()).orElse(LocalDate.now().plusDays(7).atStartOfDay());
 
@@ -63,7 +66,7 @@ public class TaskService {
                 priority,
                 assignee,
                 creator,
-                "TODO",
+                status,
                 deadline,
                 startedAt
         );
@@ -80,15 +83,16 @@ public class TaskService {
 
     // Task 조회 - 단 건
     public TaskReadResponseDto getTaskById(Long taskId) {
-        Task task = taskRepository.findByIdAndIsDeletedFalse(taskId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Task not found"));
+        Task task = taskRepository.findByIdAndIsDeletedFalse(taskId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Task not found with id = " + taskId));
 
         return TaskReadResponseDto.toDto(task);
     }
 
 
     // 특정 Task 수정 - 내용 수정
+    @Transactional
     public TaskReadResponseDto updateTask(Long taskId, TaskUpdateRequestDto requestDto, Long currentUserId) {
-        Task task = taskRepository.findByIdAndIsDeletedFalse(taskId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Does not exist id = " + currentUserId));
+        Task task = taskRepository.findByIdAndIsDeletedFalse(taskId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Task not found with id = " + taskId));
 
         User assignee = Optional.ofNullable(requestDto.getAssigneeName())
                 .map(this::findUserName)
@@ -117,6 +121,33 @@ public class TaskService {
         return TaskReadResponseDto.toDto(updateTask);
     }
 
+    // Task 상태 수정
+    @Transactional
+    public TaskReadResponseDto updateTaskStatus(Long taskId, TaskStatusUpdateRequestDto requestDto, Long currentUserId) {
+        Task task = findTaskById(taskId);
+
+        // 로그인 유저의 권한 확인
+//        if (!isUserAdmin(currentUserId)) {
+//            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "관리자 권한을 보유한 유저만 이용할 수 있습니다.");
+//        }
+
+        TaskStatus updateStatus;
+
+        // status 값 - enum 의 status 값 검증
+        try {
+            updateStatus = TaskStatus.valueOf(requestDto.getStatus());
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "변경할 상태 값이 알맞지 않습니다: " + requestDto.getStatus());
+        }
+
+        // 수정한 상태 저장
+        task.setStatus(updateStatus);
+        taskRepository.save(task);
+
+        return TaskReadResponseDto.toDto(task);
+    }
+
+
     // name 으로 User 찾기
     private User findUserName(String assigneeName) {
         return userRepository.findAll().stream()
@@ -127,4 +158,17 @@ public class TaskService {
                     return new ResponseStatusException(HttpStatus.NOT_FOUND, "Assignee name not found: " + assigneeName);
                 });
     }
+
+    // taskId 로 Task 찾기
+    private Task findTaskById(Long taskId) {
+        return taskRepository.findByIdAndIsDeletedFalse(taskId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Task not found with id = " + taskId));
+    }
+
+    // 유저가 보유한 권한 확인 (Admin? User?)
+//    private boolean isUserAdmin(Long userId) {
+//        User user = userRepository.findById(userId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "유저를 찾을 수 없습니다."));
+//        return user.getRole().equals(Role.ADMIN);
+//    }
+
 }
