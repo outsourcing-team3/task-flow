@@ -2,6 +2,7 @@ package com.example.outsourcingproject.domain.task.service;
 
 import com.example.outsourcingproject.domain.task.dto.*;
 import com.example.outsourcingproject.domain.task.entity.Task;
+import com.example.outsourcingproject.domain.task.enums.Priority;
 import com.example.outsourcingproject.domain.task.enums.TaskStatus;
 import com.example.outsourcingproject.domain.task.repository.TaskRepository;
 import com.example.outsourcingproject.domain.user.entity.User;
@@ -49,7 +50,10 @@ public class TaskService {
         String description = Optional.ofNullable(requestDto.getDescription()).filter(desc -> !desc.isBlank()).orElse("No description provided.");
 
         // priority 기본값 처리
-        String priority = Optional.ofNullable(requestDto.getPriority()).filter(pr -> !pr.isBlank()).orElse("MEDIUM");
+        Priority priority = Optional.ofNullable(requestDto.getPriority())
+                .filter(pr -> !pr.isBlank())
+                .map(Priority::fromString)
+                .orElse(Priority.MEDIUM);
 
         // status 기본값 처리
         TaskStatus status = TaskStatus.TODO;
@@ -115,7 +119,7 @@ public class TaskService {
         // 새 값이 있을 경우만 업데이트하기
         String title = Optional.ofNullable(requestDto.getTitle()).orElse(task.getTitle());
         String description = Optional.ofNullable(requestDto.getDescription()).orElse(task.getDescription());
-        String priority = Optional.ofNullable(requestDto.getPriority()).orElse(task.getPriority());
+        Priority priority = Optional.ofNullable(requestDto.getPriority()).map(Priority::fromString).orElse(task.getPriority());
         LocalDateTime deadline = Optional.ofNullable(requestDto.getDeadline()).orElse(task.getDeadline());
         LocalDateTime startedAt = Optional.ofNullable(requestDto.getStartedAt()).orElse(task.getStartedAt());
 
