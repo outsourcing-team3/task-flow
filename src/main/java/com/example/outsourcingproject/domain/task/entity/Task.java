@@ -60,4 +60,15 @@ public class Task extends BaseEntity {
         this.deadline = deadline != null ? deadline : LocalDate.now().plusDays(7).atStartOfDay();
         this.startedAt = startedAt != null ? startedAt : LocalDateTime.now();
     }
+
+    public void updateTask(String title, String description, Priority priority, User assignee, LocalDateTime deadline, LocalDateTime startedAt) {
+        this.title = title != null ? title : this.title;
+        this.description = description != null ? description : this.description;
+        this.priority = priority != null ? priority : this.priority;
+        this.assignee = assignee != null ? assignee : this.assignee;
+        this.deadline = deadline != null ? deadline : this.deadline;
+        this.startedAt = startedAt != null ? startedAt : this.startedAt;
+    }
+
+
 }

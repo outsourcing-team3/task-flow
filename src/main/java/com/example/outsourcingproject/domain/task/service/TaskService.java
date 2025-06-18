@@ -123,27 +123,17 @@ public class TaskService {
                 .map(this::findUserName)
                 .orElse(task.getAssignee());
 
-        // 새 값이 있을 경우만 업데이트하기
-        String title = Optional.ofNullable(requestDto.getTitle()).orElse(task.getTitle());
-        String description = Optional.ofNullable(requestDto.getDescription()).orElse(task.getDescription());
-        Priority priority = Optional.ofNullable(requestDto.getPriority()).map(Priority::fromString).orElse(task.getPriority());
-        LocalDateTime deadline = Optional.ofNullable(requestDto.getDeadline()).orElse(task.getDeadline());
-        LocalDateTime startedAt = Optional.ofNullable(requestDto.getStartedAt()).orElse(task.getStartedAt());
-
-        Task updateTask = new Task(
-                title,
-                description,
-                priority,
+        task.updateTask(
+                requestDto.getTitle(),
+                requestDto.getDescription(),
+                requestDto.getPriority() != null ? Priority.fromString(requestDto.getPriority()) : null,
                 assignee,
-                task.getCreator(),
-                task.getStatus(),
-                deadline,
-                startedAt
-        );
+                requestDto.getDeadline(),
+                requestDto.getStartedAt());
 
-        taskRepository.save(updateTask);
+        taskRepository.save(task);
 
-        return TaskReadResponseDto.toDto(updateTask);
+        return TaskReadResponseDto.toDto(task);
     }
 
     // Task 상태 수정
