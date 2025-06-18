@@ -56,16 +56,15 @@ public interface TaskStatisticsRepository extends JpaRepository<Task, Long> {
             WHERE t.assignee.id = :userId
              AND t.isDeleted = false
              AND t.status IN (:statuses)
-             AND t.deadline BETWEEN :start AND :end
-             AND t.deadline >= :now
+             AND t.deadline >= :now          
+             AND t.deadline <  :end           
             ORDER BY t.deadline ASC 
             """)
     List<TodayTaskItemDto> findTodayTasks(
             @Param("userId") Long userId,
             @Param("statuses") List<TaskStatus> statuses,
-            @Param("start") LocalDateTime start,
-            @Param("end") LocalDateTime end,
             @Param("now") LocalDateTime now, // overdue 제외
+            @Param("end") LocalDateTime end,
             Pageable pageable
     );
 
@@ -89,14 +88,13 @@ public interface TaskStatisticsRepository extends JpaRepository<Task, Long> {
                 FROM Task t
                 WHERE t.status IN (:statuses)
                   AND t.deadline < :now
-                  AND t.deadline >= t.createdAt
-                  AND t.createdAt BETWEEN :from AND :to
+                  AND t.deadline BETWEEN :from AND :to
                   AND t.isDeleted = false
             """)
     long countOverdueTasksInPeriod(@Param("statuses") List<TaskStatus> statuses,
                                    @Param("now") LocalDateTime now,
-                                   @Param("from") LocalDateTime from,
-                                   @Param("to") LocalDateTime to);
+                                   @Param("from") LocalDateTime from, //weekStart
+                                   @Param("to") LocalDateTime to); //weekEnd
 
 
     /*최근 7일간 날짜 별 태스크 생성 갯수 및 완료 수

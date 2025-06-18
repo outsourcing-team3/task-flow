@@ -93,17 +93,23 @@ public class DashboardService {
     }
 
 
+    /**
+     * 오늘 마감 예정이면서 아직 기한이 남은 작업(TO-DO, IN_PROGRESS) 중
+     * 마감 임박 순(deadline ASC) 상위 5개를 조회한다.
+     *
+     * now  : 현재 시각 (over-due 커트라인)
+     * end  : 내일 00:00 (= 오늘 23:59:59 포함)
+     */
     public List<TodayTaskItemDto> getMyTodayTasks(Long userId) {
         LocalDateTime now = LocalDateTime.now();
-        LocalDateTime start = LocalDate.now().atStartOfDay();  // 오늘 00:00
-        LocalDateTime end = LocalDate.now().plusDays(1).atStartOfDay(); // 내일 00:00
+        LocalDateTime end = LocalDate.now().plusDays(1).atStartOfDay(); // 내일 00:00 = 오늘의 끝
 
         Pageable topFive = PageRequest.of(0, 5);
 
         return taskStatisticsRepository.findTodayTasks(
                 userId,
                 List.of(TaskStatus.TODO, TaskStatus.IN_PROGRESS),
-                start, end, now,
+                now, end,
                 topFive
         );
 

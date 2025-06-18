@@ -76,9 +76,8 @@ class DashboardServiceTest {
     void getMyTodayTasks_callsRepositoryCorrectly() {
         // Arrange
         Long userId = 1L;
-        LocalDate today = LocalDate.now();
-        LocalDateTime start = today.atStartOfDay();
-        LocalDateTime end = today.plusDays(1).atStartOfDay();
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime end = now.toLocalDate().plusDays(1).atStartOfDay();
         Pageable topFive = PageRequest.of(0, 5);
 
         List<TodayTaskItemDto> expected = List.of(
@@ -87,8 +86,8 @@ class DashboardServiceTest {
         );
 
         when(taskStatisticsRepository.findTodayTasks(eq(userId),
-                eq(List.of(TaskStatus.TODO, TaskStatus.IN_PROGRESS)),
-                eq(start), eq(end), eq(topFive))).thenReturn(expected);
+                eq(List.of(TaskStatus.TODO, TaskStatus.IN_PROGRESS)), eq(now), eq(end), eq(topFive)))
+                .thenReturn(expected);
 
         // Act
         List<TodayTaskItemDto> result = dashboardService.getMyTodayTasks(userId);
