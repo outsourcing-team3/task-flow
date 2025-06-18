@@ -56,12 +56,13 @@ public class TaskController {
     @TaskActivityLog(type = ActivityType.TASK_UPDATED)
     @PatchMapping("/tasks/{taskId}")
     public ResponseEntity<ApiResponse<TaskReadResponseDto>> updateTask(
+            @AuthenticationPrincipal UserPrincipal userPrincipal,
             @PathVariable Long taskId,
-            @RequestBody TaskUpdateRequestDto requestDto,
-            @AuthenticationPrincipal UserPrincipal userPrincipal) {
+            @RequestBody TaskUpdateRequestDto requestDto
+            ) {
 
         Long currentUserId = userPrincipal.getId();  // 로그인된 유저의 ID
-        TaskReadResponseDto updatedTask = taskService.updateTask(taskId, requestDto, currentUserId);
+        TaskReadResponseDto updatedTask = taskService.updateTask(currentUserId, taskId, requestDto);
 
         return ResponseEntity.ok(ApiResponse.success(updatedTask, "Task 가 수정되었습니다."));
     }
@@ -69,15 +70,25 @@ public class TaskController {
     @PatchMapping("/tasks/status/{taskId}")
     @TaskActivityLog(type = ActivityType.TASK_STATUS_CHANGED)
     public ResponseEntity<ApiResponse<TaskReadResponseDto>> updateStatusTask(
+            @AuthenticationPrincipal UserPrincipal userPrincipal,
             @PathVariable Long taskId,
-            @RequestBody TaskStatusUpdateRequestDto requestDto,
-            @AuthenticationPrincipal UserPrincipal userPrincipal) {
+            @RequestBody TaskStatusUpdateRequestDto requestDto
+            ) {
 
         Long currentUserId = userPrincipal.getId();  // 로그인된 유저의 ID
-        TaskReadResponseDto updateTaskStatus = taskService.updateTaskStatus(taskId, requestDto, currentUserId);
+        TaskReadResponseDto updateTaskStatus = taskService.updateTaskStatus(currentUserId, taskId, requestDto);
 
         return ResponseEntity.ok(ApiResponse.success(updateTaskStatus, "Task 상태가 [" + updateTaskStatus.getStatus() + "] (으)로 변경되었습니다."));
     }
 
+    @DeleteMapping("/tasks/{taskId}")
+    public ResponseEntity<ApiResponse<String>> deleteTask(@PathVariable Long taskId) {
+        taskService.deleteTask(taskId);
 
+        return ResponseEntity.ok(ApiResponse.success("Task 가 삭제되었습니다."));
+
+//        return ResponseEntity
+//                .status(HttpStatus.NO_CONTENT)
+//                .body(ApiResponse.success("Task 가 삭제되었습니다."));
+    }
 }
