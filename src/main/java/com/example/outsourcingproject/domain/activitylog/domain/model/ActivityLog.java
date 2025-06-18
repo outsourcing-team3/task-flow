@@ -1,6 +1,6 @@
 package com.example.outsourcingproject.domain.activitylog.domain.model;
 
-import com.example.outsourcingproject.domain.user.entity.User;
+import com.example.outsourcingproject.domain.auth.entity.Auth;
 import com.example.outsourcingproject.global.enums.ActivityType;
 import com.example.outsourcingproject.global.enums.RequestMethod;
 import com.example.outsourcingproject.global.enums.TargetType;
@@ -22,7 +22,7 @@ public class ActivityLog {
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    private Auth auth;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "activity_type", nullable = false, length = 50)
@@ -31,6 +31,8 @@ public class ActivityLog {
     @Enumerated(EnumType.STRING)
     @Column(name = "target_type", nullable = false)
     private TargetType targetType;
+
+    private Long targetId;
 
     private String message;
 
@@ -48,10 +50,11 @@ public class ActivityLog {
 
     protected ActivityLog() {}
 
-    public ActivityLog(User user, ActivityType activityType, TargetType targetType, String message, String requestIp, RequestMethod requestMethod, String requestUrl) {
-        this.user = user;
+    public ActivityLog(Auth auth, ActivityType activityType, TargetType targetType, Long targetId, String message, String requestIp, RequestMethod requestMethod, String requestUrl) {
+        this.auth = auth;
         this.activityType = activityType;
         this.targetType = targetType;
+        this.targetId = targetId;
         this.message = message;
         this.requestIp = requestIp;
         this.requestMethod = requestMethod;

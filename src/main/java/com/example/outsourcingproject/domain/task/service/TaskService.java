@@ -105,7 +105,7 @@ public class TaskService {
 
     // 특정 Task 수정 - 내용 수정
     @Transactional
-    public TaskReadResponseDto updateTask(Long taskId, TaskUpdateRequestDto requestDto, Long currentUserId) {
+    public TaskReadResponseDto updateTask(Long currentUserId, Long taskId, TaskUpdateRequestDto requestDto) {
         Task task = taskRepository.findByIdAndIsDeletedFalse(taskId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Task not found with id = " + taskId));
 
         User assignee = Optional.ofNullable(requestDto.getAssigneeName())
@@ -137,7 +137,7 @@ public class TaskService {
 
     // Task 상태 수정
     @Transactional
-    public TaskReadResponseDto updateTaskStatus(Long taskId, TaskStatusUpdateRequestDto requestDto, Long currentUserId) {
+    public TaskReadResponseDto updateTaskStatus(Long currentUserId, Long taskId, TaskStatusUpdateRequestDto requestDto) {
         Task task = findTaskById(taskId);
 
         // 로그인 유저의 권한 확인
