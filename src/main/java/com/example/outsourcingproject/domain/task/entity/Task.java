@@ -45,4 +45,19 @@ public class Task extends BaseEntity {
 
     @Column(name = "started_at", nullable = false)
     private LocalDateTime startedAt;
+
+
+
+    public Task(String title, Priority priority, TaskStatus status,
+                Long assigneeId, Long creatorId,
+                LocalDateTime deadline, LocalDateTime startedAt) {
+        this.title = title;
+        this.priority = priority;
+        this.status = status;
+        this.assigneeId = assigneeId;
+        this.creatorId = creatorId;
+        this.deadline = deadline;
+        this.startedAt = startedAt;
+    }
+
 }

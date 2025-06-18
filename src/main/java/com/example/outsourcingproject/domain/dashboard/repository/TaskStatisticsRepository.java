@@ -3,7 +3,9 @@ package com.example.outsourcingproject.domain.dashboard.repository;
 import com.example.outsourcingproject.domain.dashboard.dto.DailyTaskTrendDto;
 import com.example.outsourcingproject.domain.dashboard.dto.MonthlyTaskTrendDto;
 import com.example.outsourcingproject.domain.dashboard.dto.TaskStatusCountDto;
-import com.example.outsourcingproject.domain.task.dto.TodayTaskItemDto;
+import com.example.outsourcingproject.domain.dashboard.dto.TodayTaskItemDto;
+import com.example.outsourcingproject.domain.dashboard.projection.DailyTaskTrendProjection;
+import com.example.outsourcingproject.domain.dashboard.projection.MonthlyTaskTrendProjection;
 import com.example.outsourcingproject.domain.task.entity.Task;
 import com.example.outsourcingproject.domain.task.enums.TaskStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -48,25 +50,23 @@ public interface TaskStatisticsRepository extends JpaRepository<Task, Long> {
                                 @Param("to") LocalDateTime to);
 
 
-   @Query("""
-        SELECT new com.example.outsourcingproject.domain.task.dto.TodayTaskItemDto(
-                t.id, t.title, t.status, t.priority, t.deadline)
-        FROM Task t
-        WHERE t.assigneeId = :userId
-         AND t.isDeleted = false
-         AND t.status IN (:statuses)
-         AND t.deadline BETWEEN :start AND :end
-        ORDER BY t.deadline ASC 
-        """)
-   List<TodayTaskItemDto> findTodayTasks(
-           @Param("userId") Long userId,
-           @Param("statuses") List<TaskStatus> statuses,
-           @Param("start") LocalDateTime start,
-           @Param("end")   LocalDateTime end,
-           Pageable pageable
-   );
-
-
+    @Query("""
+            SELECT new com.example.outsourcingproject.domain.dashboard.dto.TodayTaskItemDto(
+                    t.id, t.title, t.status, t.priority, t.deadline)
+            FROM Task t
+            WHERE t.assigneeId = :userId
+             AND t.isDeleted = false
+             AND t.status IN (:statuses)
+             AND t.deadline BETWEEN :start AND :end
+            ORDER BY t.deadline ASC 
+            """)
+    List<TodayTaskItemDto> findTodayTasks(
+            @Param("userId") Long userId,
+            @Param("statuses") List<TaskStatus> statuses,
+            @Param("start") LocalDateTime start,
+            @Param("end") LocalDateTime end,
+            Pageable pageable
+    );
 
 
 //
@@ -96,20 +96,18 @@ public interface TaskStatisticsRepository extends JpaRepository<Task, Long> {
 
     /*최근 7일간 날짜 별 태스크 생성 갯수 및 완료 수
     일별 작업 트렌드 그래프 용 (createdAt 기준)*/
-    @Query("""
-                SELECT new com.example.outsourcingproject.domain.dashboard.dto.DailyTaskTrendDto(
-                 DATE(t.createdAt),      
-                 COUNT(t),              
-                 SUM(CASE WHEN t.status ='DONE' THEN 1L ELSE 0L END)
-                 )
-                 FROM Task t
-                 WHERE t.createdAt BETWEEN :start AND :end
-                    AND t.isDeleted = false
-                    GROUP BY DATE(t.createdAt)
-                    ORDER BY DATE(t.createdAt)
-            """)
-    List<DailyTaskTrendDto> fetchDailyTrend(@Param("start") LocalDateTime start,
-                                            @Param("end") LocalDateTime end);
+    @Query(value = """
+                SELECT DATE(t.created_at) AS date,
+                       COUNT(*) AS totalCount,
+                       SUM(CASE WHEN t.status = 'DONE' THEN 1 ELSE 0 END) AS doneCount
+                FROM task t
+                WHERE t.created_at BETWEEN :start AND :end
+                  AND t.is_deleted = false
+                GROUP BY DATE(t.created_at)
+                ORDER BY DATE(t.created_at)
+            """, nativeQuery = true)
+    List<DailyTaskTrendProjection> fetchDailyTrend(@Param("start") LocalDateTime start,
+                                                   @Param("end") LocalDateTime end);
 
     /*전체 태스크 상태별 개수 통계
     전체 비율 통계 계산용*/
@@ -151,21 +149,17 @@ public interface TaskStatisticsRepository extends JpaRepository<Task, Long> {
 
     /*특정 연도에 월 단위로 생성도니 태스크 개수 및 완료 개수
     월간 그래프 용*/
-    @Query(
-            """
-                    SELECT new com.example.outsourcingproject.domain.dashboard.dto.MonthlyTaskTrendDto(
-                            MONTH(t.createdAt),
-                            COUNT(t),
-                            SUM(CASE WHEN t.status = 'DONE' THEN 1L ELSE 0L END)
-                            )
-                            FROM Task t
-                            WHERE YEAR(t.createdAt) = :year
-                            AND t.isDeleted = false
-                            GROUP BY MONTH(t.createdAt)
-                            ORDER BY MONTH(t.createdAt)
-                    
-                    """)
-    List<MonthlyTaskTrendDto> fetchFixedMonthlyTrend(@Param("year") int year);
+    @Query(value = """
+                SELECT MONTH(t.created_at) AS month,
+                       COUNT(*) AS totalCount,
+                       SUM(CASE WHEN t.status = 'DONE' THEN 1 ELSE 0 END) AS doneCount
+                FROM task t
+                WHERE YEAR(t.created_at) = :year
+                  AND t.is_deleted = false
+                GROUP BY MONTH(t.created_at)
+                ORDER BY MONTH(t.created_at)
+            """, nativeQuery = true)
+    List<MonthlyTaskTrendProjection> fetchFixedMonthlyTrend(@Param("year") int year);
 
 
 }

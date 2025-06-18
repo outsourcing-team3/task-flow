@@ -2,7 +2,7 @@ package com.example.outsourcingproject.domain.dashboard.controller;
 
 
 import com.example.outsourcingproject.domain.dashboard.dto.*;
-import com.example.outsourcingproject.domain.task.dto.TodayTaskItemDto;
+import com.example.outsourcingproject.domain.dashboard.dto.TodayTaskItemDto;
 import com.example.outsourcingproject.global.dto.ApiResponse;
 import com.example.outsourcingproject.domain.dashboard.service.DashboardService;
 import com.example.outsourcingproject.global.security.UserPrincipal;
@@ -69,10 +69,9 @@ public class DashboardController {
     }
 
 
-    @GetMapping("/dashboard/activity-feed")
+    @GetMapping("/activities/my")
     public ApiResponse<List<ActivityFeedDto>> feed() {
         return ApiResponse.success(dashboardService.getAcitivityFeed(), "활동 피드를 조회했습니다.");
     }
 
 }
-

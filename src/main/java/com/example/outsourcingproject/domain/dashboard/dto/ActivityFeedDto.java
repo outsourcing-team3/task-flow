@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Getter
 @AllArgsConstructor(staticName = "of")
@@ -11,5 +12,5 @@ public class ActivityFeedDto {
 
     private String userName;
     private String message;
-    private LocalDate activityDate;
+    private LocalDateTime activityDate;
 }

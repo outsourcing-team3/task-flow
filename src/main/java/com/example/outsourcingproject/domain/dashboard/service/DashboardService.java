@@ -3,8 +3,7 @@ package com.example.outsourcingproject.domain.dashboard.service;
 import com.example.outsourcingproject.domain.dashboard.dto.*;
 import com.example.outsourcingproject.domain.dashboard.repository.AcitivityFeedRepository;
 import com.example.outsourcingproject.domain.dashboard.repository.TaskStatisticsRepository;
-import com.example.outsourcingproject.domain.task.dto.TodayTaskItemDto;
-import com.example.outsourcingproject.domain.task.entity.Task;
+import com.example.outsourcingproject.domain.dashboard.dto.TodayTaskItemDto;
 import com.example.outsourcingproject.domain.task.enums.TaskStatus;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.PageRequest;
@@ -13,6 +12,7 @@ import org.springframework.data.domain.PageRequest;
 import lombok.RequiredArgsConstructor;
 
 
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,23 +40,23 @@ public class DashboardService {
      */
     public DashboardStatisticsDto getWeeklyStatistics(LocalDate date) {
 
-        LocalDate monday           = date.with(DayOfWeek.MONDAY);
-        LocalDateTime weekStart    = monday.atStartOfDay();
-        LocalDateTime weekEnd      = monday.plusWeeks(1).atStartOfDay();
+        LocalDate monday = date.with(DayOfWeek.MONDAY);
+        LocalDateTime weekStart = monday.atStartOfDay();
+        LocalDateTime weekEnd = monday.plusWeeks(1).atStartOfDay();
 
 
         LocalDateTime prevWeekStart = monday.minusWeeks(1).atStartOfDay();
-        LocalDateTime prevWeekEnd   = weekStart;
+        LocalDateTime prevWeekEnd = weekStart;
 
-        long total      = taskStatisticsRepository.countByCreatedAtBetween(weekStart, weekEnd);
-        long todo       = taskStatisticsRepository.countByStatusAndPeriod(TaskStatus.TODO,        weekStart, weekEnd);
+        long total = taskStatisticsRepository.countByCreatedAtBetween(weekStart, weekEnd);
+        long todo = taskStatisticsRepository.countByStatusAndPeriod(TaskStatus.TODO, weekStart, weekEnd);
         long inProgress = taskStatisticsRepository.countByStatusAndPeriod(TaskStatus.IN_PROGRESS, weekStart, weekEnd);
-        long done       = taskStatisticsRepository.countByStatusAndPeriod(TaskStatus.DONE,        weekStart, weekEnd);
-        long overdue    = taskStatisticsRepository.countOverdueTasks(List.of(TaskStatus.TODO, TaskStatus.IN_PROGRESS), LocalDateTime.now());
+        long done = taskStatisticsRepository.countByStatusAndPeriod(TaskStatus.DONE, weekStart, weekEnd);
+        long overdue = taskStatisticsRepository.countOverdueTasks(List.of(TaskStatus.TODO, TaskStatus.IN_PROGRESS), LocalDateTime.now());
 
-        double completionRate  = rate(done, total);
-        double inProgressRate  = rate(inProgress, total);
-        double overdueRate     = rate(overdue, total);
+        double completionRate = rate(done, total);
+        double inProgressRate = rate(inProgress, total);
+        double overdueRate = rate(overdue, total);
 
 
         //주간 증가율 계산
@@ -81,14 +81,12 @@ public class DashboardService {
     }
 
 
-
     private double rate(long part, long total) {
         return (total == 0) ? 0.0 : Math.round(part * 10000.0 / total) / 100.0;
     }
 
 
-
-    public List<TodayTaskItemDto> getMyTodayTasks(Long userId){
+    public List<TodayTaskItemDto> getMyTodayTasks(Long userId) {
         LocalDate today = LocalDate.now();
         LocalDateTime start = today.atStartOfDay();
         LocalDateTime end = today.plusDays(1).atStartOfDay();
@@ -127,7 +125,9 @@ public class DashboardService {
         LocalDateTime end = monday.plusWeeks(1).atStartOfDay();
 
 
-        return taskStatisticsRepository.fetchDailyTrend(start, end);
+        return taskStatisticsRepository.fetchDailyTrend(start, end).stream()
+                .map(p -> DailyTaskTrendDto.of(p.getDate(), p.getTotalCount(), p.getDoneCount()))
+                .collect(Collectors.toList());
 
     }
 
@@ -166,7 +166,7 @@ public class DashboardService {
         long teamDone = teamMap.getOrDefault(TaskStatus.DONE, 0L);
         long teamTotal = teamMap.values().stream().mapToLong(Long::longValue).sum();
 
-        double myRate   = rate(myDone,   myTotal);
+        double myRate = rate(myDone, myTotal);
         double teamRate = rate(teamDone, teamTotal);
 
         return ProgressRatioDto.of(myRate, teamRate);
@@ -174,13 +174,12 @@ public class DashboardService {
     }
 
 
-
     private Map<TaskStatus, Long> toMap(List<TaskStatusCountDto> list) {
 
         return list.stream()
-                    .collect(Collectors.toMap(
-                            TaskStatusCountDto::getStatus,
-                            TaskStatusCountDto::getCount));
+                .collect(Collectors.toMap(
+                        TaskStatusCountDto::getStatus,
+                        TaskStatusCountDto::getCount));
 
     }
 
@@ -188,7 +187,11 @@ public class DashboardService {
     //월별 추세 구하기
     public List<MonthlyTaskTrendDto> getMonthlyTrend() {
         int year = Year.now().getValue();
-        List<MonthlyTaskTrendDto> result = taskStatisticsRepository.fetchFixedMonthlyTrend(year);
+
+        // projection → DTO 변환
+        List<MonthlyTaskTrendDto> result = taskStatisticsRepository.fetchFixedMonthlyTrend(year).stream()
+                .map(p -> MonthlyTaskTrendDto.of(p.getMonth(), p.getTotalCount(), p.getDoneCount()))
+                .collect(Collectors.toList());
 
         Map<Integer, MonthlyTaskTrendDto> map = result.stream()
                 .collect(Collectors.toMap(
@@ -207,10 +210,15 @@ public class DashboardService {
     }
 
 
-    public List<ActivityFeedDto> getAcitivityFeed(){
+    //활동 피드 가져오기
+    public List<ActivityFeedDto> getAcitivityFeed() {
         LocalDateTime to = LocalDateTime.now();
         LocalDateTime from = to.minusDays(7);
-        return acitivityFeedRepository.fetchFeed(from, to);
+
+        Pageable topFive = PageRequest.of(0, 5, // 0페이지, 5건
+                Sort.by(Sort.Direction.DESC, "createdAt")); // 최신순
+
+        return acitivityFeedRepository.fetchFeed(from, to, topFive);
 
     }
 
