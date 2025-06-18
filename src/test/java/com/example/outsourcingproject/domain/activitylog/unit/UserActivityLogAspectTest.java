@@ -1,8 +1,8 @@
 package com.example.outsourcingproject.domain.activitylog.unit;
 
 import com.example.outsourcingproject.domain.auth.enums.UserRole;
-import com.example.outsourcingproject.global.aop.annotation.LogActivity;
-import com.example.outsourcingproject.global.aop.aspect.ActivityLogAspect;
+import com.example.outsourcingproject.global.aop.annotation.UserActivityLog;
+import com.example.outsourcingproject.global.aop.aspect.UserActivityLogAspect;
 import com.example.outsourcingproject.global.aop.event.ActivityLogPublisher;
 import com.example.outsourcingproject.global.aop.event.dto.ActivityLogEventDto;
 import com.example.outsourcingproject.global.enums.ActivityType;
@@ -26,7 +26,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class ActivityLogAspectTest {
+class UserActivityLogAspectTest {
 
     @Mock
     private ActivityLogPublisher activityLogPublisher;
@@ -35,14 +35,13 @@ class ActivityLogAspectTest {
     private HttpServletRequest httpServletRequest;
 
     @InjectMocks
-    private ActivityLogAspect activityLogAspect;
+    private UserActivityLogAspect userActivityLogAspect;
 
     @Test
     void 로그_정상_발행_테스트() throws Throwable {
         // given
-        LogActivity logActivity = mock(LogActivity.class);
-        when(logActivity.type()).thenReturn(ActivityType.USER_LOGGED_IN);
-        when(logActivity.target()).thenReturn(TargetType.USER);
+        UserActivityLog userActivityLog = mock(UserActivityLog.class);
+        when(userActivityLog.type()).thenReturn(ActivityType.USER_LOGGED_IN);
 
         // HttpServletRequest Mock
         when(httpServletRequest.getRemoteAddr()).thenReturn("127.0.0.1");
@@ -70,7 +69,7 @@ class ActivityLogAspectTest {
         when(joinPoint.proceed()).thenReturn(expectedResult);
 
         // when
-        Object actualResult = activityLogAspect.logActivity(joinPoint, logActivity);
+        Object actualResult = userActivityLogAspect.logActivity(joinPoint, userActivityLog);
 
         // then
         assertEquals(expectedResult, actualResult);
@@ -93,13 +92,13 @@ class ActivityLogAspectTest {
         ProceedingJoinPoint joinPoint = mock(ProceedingJoinPoint.class);
         when(joinPoint.proceed()).thenReturn("result");
 
-        LogActivity logActivity = mock(LogActivity.class);
+        UserActivityLog userActivityLog = mock(UserActivityLog.class);
 
         // 인증 정보 없음
         SecurityContextHolder.clearContext();
 
         // when
-        Object result = activityLogAspect.logActivity(joinPoint, logActivity);
+        Object result = userActivityLogAspect.logActivity(joinPoint, userActivityLog);
 
         // then
         assertEquals("result", result);

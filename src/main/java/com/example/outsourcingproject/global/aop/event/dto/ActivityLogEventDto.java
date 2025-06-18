@@ -12,6 +12,7 @@ public class ActivityLogEventDto {
     private final Long userId;
     private final ActivityType activityType;
     private final TargetType targetType;
+    private final Long TargetId;
     private final String message;
     private final String requestIp;
     private final RequestMethod requestMethod;

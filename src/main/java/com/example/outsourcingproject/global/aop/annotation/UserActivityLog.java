@@ -10,7 +10,6 @@ import java.lang.annotation.RetentionPolicy;
 
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface LogActivity {
-    TargetType target();
+public @interface UserActivityLog {
     ActivityType type();
 }

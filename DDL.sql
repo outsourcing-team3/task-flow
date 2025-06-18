@@ -133,6 +133,7 @@ CREATE TABLE activity_logs (
     user_id BIGINT NULL COMMENT '유저 ID (FK)',
     activity_type VARCHAR(50) NOT NULL COMMENT '활동 타입 Enum 명',
     target_type VARCHAR(50) NULL COMMENT '타겟 Enum 명',
+    target_id BIGINT NULL COMMENT '타겟 id',
     message TEXT COMMENT '작업 내용 (사용자 친화)',
     request_ip VARCHAR(45),
     request_method VARCHAR(10),
@@ -144,6 +145,7 @@ CREATE TABLE activity_logs (
 
     INDEX idx_logs_user_id (user_id),
     INDEX idx_logs_activity_type_id (activity_type),
-    INDEX idx_logs_task_id (target_type),
+    INDEX idx_logs_target_type (target_type),
+    INDEX idx_logs_target_id (target_id),
     INDEX idx_logs_created_at (created_at)
 ) COMMENT = '활동 로그 Table';

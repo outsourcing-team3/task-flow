@@ -28,6 +28,7 @@ public class ActivityLogEventListener {
                 auth,
                 event.getActivityType(),
                 event.getTargetType(),
+                event.getTargetId(),
                 event.getMessage(),
                 event.getRequestIp(),
                 event.getRequestMethod(),

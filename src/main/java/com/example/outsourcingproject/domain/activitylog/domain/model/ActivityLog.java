@@ -32,6 +32,8 @@ public class ActivityLog {
     @Column(name = "target_type", nullable = false)
     private TargetType targetType;
 
+    private Long targetId;
+
     private String message;
 
     private String requestIp;
@@ -48,10 +50,11 @@ public class ActivityLog {
 
     protected ActivityLog() {}
 
-    public ActivityLog(Auth auth, ActivityType activityType, TargetType targetType, String message, String requestIp, RequestMethod requestMethod, String requestUrl) {
+    public ActivityLog(Auth auth, ActivityType activityType, TargetType targetType, Long targetId, String message, String requestIp, RequestMethod requestMethod, String requestUrl) {
         this.auth = auth;
         this.activityType = activityType;
         this.targetType = targetType;
+        this.targetId = targetId;
         this.message = message;
         this.requestIp = requestIp;
         this.requestMethod = requestMethod;
