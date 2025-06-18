@@ -36,11 +36,13 @@ public class DashboardService {
 
 
     /**
-     * 기준일(date)을 포함한 주(월~일)와 그 전 주를 비교해 통계와 주간 증감률을 반환.
+     * 기준일(date)을 포함한 주(월~일)와 그 전 주를 비교해 통계와 주간 증감률을 반환. 날짜를 적지 않으면 deafult = 오늘
      */
     public DashboardStatisticsDto getWeeklyStatistics(LocalDate date) {
 
-        LocalDate monday = date.with(DayOfWeek.MONDAY);
+
+        LocalDate baseDate = (date != null) ? date : LocalDate.now();
+        LocalDate monday = baseDate.with(DayOfWeek.MONDAY);
         LocalDateTime weekStart = monday.atStartOfDay();
         LocalDateTime weekEnd = monday.plusWeeks(1).atStartOfDay();
 
@@ -52,7 +54,12 @@ public class DashboardService {
         long todo = taskStatisticsRepository.countByStatusAndPeriod(TaskStatus.TODO, weekStart, weekEnd);
         long inProgress = taskStatisticsRepository.countByStatusAndPeriod(TaskStatus.IN_PROGRESS, weekStart, weekEnd);
         long done = taskStatisticsRepository.countByStatusAndPeriod(TaskStatus.DONE, weekStart, weekEnd);
-        long overdue = taskStatisticsRepository.countOverdueTasks(List.of(TaskStatus.TODO, TaskStatus.IN_PROGRESS), LocalDateTime.now());
+        long overdue = taskStatisticsRepository.countOverdueTasksInPeriod(
+                List.of(TaskStatus.TODO, TaskStatus.IN_PROGRESS),
+                LocalDateTime.now(),
+                weekStart,
+                weekEnd
+        );
 
         double completionRate = rate(done, total);
         double inProgressRate = rate(inProgress, total);
@@ -87,16 +94,16 @@ public class DashboardService {
 
 
     public List<TodayTaskItemDto> getMyTodayTasks(Long userId) {
-        LocalDate today = LocalDate.now();
-        LocalDateTime start = today.atStartOfDay();
-        LocalDateTime end = today.plusDays(1).atStartOfDay();
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime start = LocalDate.now().atStartOfDay();  // 오늘 00:00
+        LocalDateTime end = LocalDate.now().plusDays(1).atStartOfDay(); // 내일 00:00
 
         Pageable topFive = PageRequest.of(0, 5);
 
         return taskStatisticsRepository.findTodayTasks(
                 userId,
                 List.of(TaskStatus.TODO, TaskStatus.IN_PROGRESS),
-                start, end,
+                start, end, now,
                 topFive
         );
 
@@ -115,13 +122,16 @@ public class DashboardService {
 //    }
 
 
-    //최근 1주(월~일) 트렌드 반환
-    public List<DailyTaskTrendDto> getWeeklyTrend(LocalDate today) {
 
-        //이번주 월요일 00:00
-        LocalDate monday = today.with(java.time.DayOfWeek.MONDAY);
+
+
+    // 1주간(입력한 날짜가 속한 주의 월요일~일요일) 작업 트렌드 반환. 날짜를 적지 않으면 deafult = 오늘
+    public List<DailyTaskTrendDto> getWeeklyTrend(LocalDate date) {
+        LocalDate baseDate = (date != null) ? date : LocalDate.now();
+        // 기준 날짜가 속한 주의 월요일 00:00부터
+        LocalDate monday = baseDate.with(java.time.DayOfWeek.MONDAY);
         LocalDateTime start = monday.atStartOfDay();
-        //다음 주 월요일 00:00
+        // 다음 주 월요일 00:00(미포함)까지 범위 조회
         LocalDateTime end = monday.plusWeeks(1).atStartOfDay();
 
 

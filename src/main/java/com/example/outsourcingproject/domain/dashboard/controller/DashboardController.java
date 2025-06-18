@@ -24,7 +24,8 @@ public class DashboardController {
 
     @GetMapping("/dashboard/statistics")
     public ApiResponse<DashboardStatisticsDto> statistics(
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+            @RequestParam(required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
         return ApiResponse.success(dashboardService.getWeeklyStatistics(date), "통계 조회 성공");
     }
 
@@ -46,10 +47,11 @@ public class DashboardController {
 //    }
 
     @GetMapping("/dashboard/trend/week")
-    public ApiResponse<List<DailyTaskTrendDto>> weeklyTrend() {
-        return ApiResponse.success(dashboardService.getWeeklyTrend(LocalDate.now()), "주간 트렌드 조회 성공");
+    public ApiResponse<List<DailyTaskTrendDto>> weeklyTrend(
+            @RequestParam(required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+        return ApiResponse.success(dashboardService.getWeeklyTrend(date), "주간 트렌드 조회 성공");
     }
-
     @GetMapping("/dashboard/status-ratio")
     public ApiResponse<TaskStatusRatioDto> statusRatio() {
         return ApiResponse.success(dashboardService.getStatusRatio(), "작업 상태 분포 조회 성공");
@@ -69,7 +71,7 @@ public class DashboardController {
     }
 
 
-    @GetMapping("/activities/my")
+    @GetMapping("/dashboard/activity-feed")
     public ApiResponse<List<ActivityFeedDto>> feed() {
         return ApiResponse.success(dashboardService.getAcitivityFeed(), "활동 피드를 조회했습니다.");
     }

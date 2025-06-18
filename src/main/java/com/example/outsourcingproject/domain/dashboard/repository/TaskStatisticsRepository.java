@@ -1,7 +1,6 @@
 package com.example.outsourcingproject.domain.dashboard.repository;
 
-import com.example.outsourcingproject.domain.dashboard.dto.DailyTaskTrendDto;
-import com.example.outsourcingproject.domain.dashboard.dto.MonthlyTaskTrendDto;
+
 import com.example.outsourcingproject.domain.dashboard.dto.TaskStatusCountDto;
 import com.example.outsourcingproject.domain.dashboard.dto.TodayTaskItemDto;
 import com.example.outsourcingproject.domain.dashboard.projection.DailyTaskTrendProjection;
@@ -14,7 +13,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.data.domain.Pageable;
 
-import java.time.LocalDate;
+
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -54,10 +53,11 @@ public interface TaskStatisticsRepository extends JpaRepository<Task, Long> {
             SELECT new com.example.outsourcingproject.domain.dashboard.dto.TodayTaskItemDto(
                     t.id, t.title, t.status, t.priority, t.deadline)
             FROM Task t
-            WHERE t.assigneeId = :userId
+            WHERE t.assignee.id = :userId
              AND t.isDeleted = false
              AND t.status IN (:statuses)
              AND t.deadline BETWEEN :start AND :end
+             AND t.deadline >= :now
             ORDER BY t.deadline ASC 
             """)
     List<TodayTaskItemDto> findTodayTasks(
@@ -65,6 +65,7 @@ public interface TaskStatisticsRepository extends JpaRepository<Task, Long> {
             @Param("statuses") List<TaskStatus> statuses,
             @Param("start") LocalDateTime start,
             @Param("end") LocalDateTime end,
+            @Param("now") LocalDateTime now, // overdue 제외
             Pageable pageable
     );
 
@@ -83,15 +84,19 @@ public interface TaskStatisticsRepository extends JpaRepository<Task, Long> {
 //                                      @Param("statuses") List<TaskStatus> statuses);
 
 
-    //마감기한이 지난 작업 개수
     @Query("""
                 SELECT COUNT(t)
                 FROM Task t
                 WHERE t.status IN (:statuses)
                   AND t.deadline < :now
+                  AND t.deadline >= t.createdAt
+                  AND t.createdAt BETWEEN :from AND :to
                   AND t.isDeleted = false
             """)
-    long countOverdueTasks(@Param("statuses") List<TaskStatus> statuses, @Param("now") LocalDateTime now);
+    long countOverdueTasksInPeriod(@Param("statuses") List<TaskStatus> statuses,
+                                   @Param("now") LocalDateTime now,
+                                   @Param("from") LocalDateTime from,
+                                   @Param("to") LocalDateTime to);
 
 
     /*최근 7일간 날짜 별 태스크 생성 갯수 및 완료 수
@@ -100,7 +105,7 @@ public interface TaskStatisticsRepository extends JpaRepository<Task, Long> {
                 SELECT DATE(t.created_at) AS date,
                        COUNT(*) AS totalCount,
                        SUM(CASE WHEN t.status = 'DONE' THEN 1 ELSE 0 END) AS doneCount
-                FROM task t
+                FROM tasks t
                 WHERE t.created_at BETWEEN :start AND :end
                   AND t.is_deleted = false
                 GROUP BY DATE(t.created_at)
@@ -128,7 +133,7 @@ public interface TaskStatisticsRepository extends JpaRepository<Task, Long> {
                      SELECT new com.example.outsourcingproject.domain.dashboard.dto.TaskStatusCountDto(
                                 t.status, COUNT(t))
                      FROM Task t
-                     WHERE t.assigneeId = :userId
+                     WHERE t.assignee.id = :userId
                      AND t.isDeleted = false
                      GROUP BY t.status
             """)
@@ -153,7 +158,7 @@ public interface TaskStatisticsRepository extends JpaRepository<Task, Long> {
                 SELECT MONTH(t.created_at) AS month,
                        COUNT(*) AS totalCount,
                        SUM(CASE WHEN t.status = 'DONE' THEN 1 ELSE 0 END) AS doneCount
-                FROM task t
+                FROM tasks t
                 WHERE YEAR(t.created_at) = :year
                   AND t.is_deleted = false
                 GROUP BY MONTH(t.created_at)

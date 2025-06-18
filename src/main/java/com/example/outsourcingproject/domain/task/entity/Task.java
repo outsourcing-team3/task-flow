@@ -2,62 +2,60 @@ package com.example.outsourcingproject.domain.task.entity;
 
 import com.example.outsourcingproject.domain.task.enums.Priority;
 import com.example.outsourcingproject.domain.task.enums.TaskStatus;
+import com.example.outsourcingproject.domain.user.entity.User;
 import com.example.outsourcingproject.global.entity.BaseEntity;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 
+@Getter
 @Entity
 @Table(name = "tasks")
-@Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Task extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
     private String title;
 
-    @Column(columnDefinition = "LONGTEXT")
+    @Column(columnDefinition = "longtext")
     private String description;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 10)
     private Priority priority;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
-    private TaskStatus status;
+    @ManyToOne
+    @JoinColumn(name = "assignee_id")
+    private User assignee;
 
-    @Column(name = "assignee_id")
-    private Long assigneeId; // 담당자 ID (User FK)
+    @ManyToOne
+    @JoinColumn(name = "creator_id")
+    private User creator;
 
-    @Column(name = "creator_id", nullable = false)
-    private Long creatorId; // 생성자 ID (User FK)
-
-    @Column(name = "deadline")
     private LocalDateTime deadline;
 
-    @Column(name = "started_at", nullable = false)
+    @Setter
+    @Enumerated(EnumType.STRING)
+    private TaskStatus status;
+
     private LocalDateTime startedAt;
 
+    public Task() {
+    }
 
-
-    public Task(String title, Priority priority, TaskStatus status,
-                Long assigneeId, Long creatorId,
-                LocalDateTime deadline, LocalDateTime startedAt) {
+    public Task(String title, String description, Priority priority, User assignee, User creator,
+                TaskStatus status, LocalDateTime deadline, LocalDateTime startedAt)
+    {
         this.title = title;
+        this.description = description;
         this.priority = priority;
+        this.assignee = assignee;
+        this.creator = creator;
         this.status = status;
-        this.assigneeId = assigneeId;
-        this.creatorId = creatorId;
         this.deadline = deadline;
         this.startedAt = startedAt;
     }
-
 }
