@@ -3,6 +3,7 @@ package com.example.outsourcingproject.global.aop.aspect;
 import com.example.outsourcingproject.domain.auth.dto.response.SigninResponseDto;
 import com.example.outsourcingproject.domain.task.dto.TaskCreateResponseDto;
 import com.example.outsourcingproject.domain.task.dto.TaskReadResponseDto;
+import com.example.outsourcingproject.domain.task.enums.TaskStatus;
 import com.example.outsourcingproject.global.aop.annotation.TaskActivityLog;
 import com.example.outsourcingproject.global.aop.annotation.UserActivityLog;
 import com.example.outsourcingproject.global.aop.aspect.util.ActivityLogAspectUtil;
@@ -45,12 +46,9 @@ public class TaskActivityLogAspect {
         Long userId = ActivityLogAspectUtil.getUserIdFromUserPrincipal();
         if (userId == null) return response;
 
-//        Long taskId = getTaskId(taskActivityLog, joinPoint, response);
-        Long taskId = null;
+        Long taskId = getTaskId(taskActivityLog, joinPoint, response);
 
-//        String message = extractTaskMessage(taskActivityLog, response);
-        String message = taskActivityLog.type().getMessage1();
-
+        String message = extractTaskMessage(taskActivityLog, response);
 
         ActivityLogEventDto activityLogEventDto = new ActivityLogEventDto(
                 userId,
@@ -69,58 +67,58 @@ public class TaskActivityLogAspect {
         return response;
     }
 
-//    private String extractTaskMessage(TaskActivityLog taskActivityLog, Object response) {
-//        if(taskActivityLog.type().equals(ActivityType.TASK_STATUS_CHANGED)){
-//            return generateTaskStatusChangeMessage(response);
-//        }
-//        return taskActivityLog.type().getMessage1();
-//    }
-//
-//    private String generateTaskStatusChangeMessage(Object response) {
-//        if (
-//                response instanceof ResponseEntity<?> entity
-//                && entity.getBody() instanceof ApiResponse<?> apiResponse
-//                && apiResponse.getData() instanceof TaskReadResponseDto dto
-//        ) {
-//            if(dto.getStatus().equals(TaskStatus.IN_PROGRESS)) {
-//                return String.format(ActivityType.TASK_STATUS_CHANGED.getMessage1(), TaskStatus.TODO, TaskStatus.IN_PROGRESS);
-//            } else if(dto.getStatus().equals(TaskStatus.DONE)) {
-//                return String.format(ActivityType.TASK_STATUS_CHANGED.getMessage1(), TaskStatus.IN_PROGRESS, TaskStatus.DONE);
-//            }
-//        }
-//        return null;
-//    }
+    private String extractTaskMessage(TaskActivityLog taskActivityLog, Object response) {
+        if(taskActivityLog.type().equals(ActivityType.TASK_STATUS_CHANGED)){
+            return generateTaskStatusChangeMessage(response);
+        }
+        return taskActivityLog.type().getMessage1();
+    }
+
+    private String generateTaskStatusChangeMessage(Object response) {
+        if (
+                response instanceof ResponseEntity<?> entity
+                && entity.getBody() instanceof ApiResponse<?> apiResponse
+                && apiResponse.getData() instanceof TaskReadResponseDto dto
+        ) {
+            if(dto.getStatus().equals(TaskStatus.IN_PROGRESS.toString())) {
+                return String.format(ActivityType.TASK_STATUS_CHANGED.getMessage1(), TaskStatus.IN_PROGRESS);
+            } else if(dto.getStatus().equals(TaskStatus.DONE.toString())) {
+                return String.format(ActivityType.TASK_STATUS_CHANGED.getMessage1(), TaskStatus.DONE);
+            }
+        }
+        return null;
+    }
 
 
-//    private Long getTaskId(TaskActivityLog taskActivityLog, JoinPoint joinPoint, Object response) {
-//        if(taskActivityLog.type().equals(ActivityType.TASK_CREATED)) {
-//            return getTaskIdFromResponseDto(response);
-//        } else {
-//            return getTaskIdFromRequestParams(joinPoint);
-//        }
-//    }
-//
-//    private Long getTaskIdFromResponseDto(Object response) {
-//        if (
-//                response instanceof ResponseEntity<?> entity
-//                && entity.getBody() instanceof ApiResponse<?> apiResponse
-//                && apiResponse.getData() instanceof TaskCreateResponseDto dto
-//        ) {
-//            return dto.getId();
-//        }
-//        return null;
-//    }
-//
-//    private Long getTaskIdFromRequestParams(JoinPoint joinPoint) {
-//        MethodSignature signature = (MethodSignature) joinPoint.getSignature();
-//        String[] parameterNames = signature.getParameterNames();
-//        Object[] args = joinPoint.getArgs();
-//
-//        for (int i = 0; i < parameterNames.length; i++) {
-//            if ("taskId".equals(parameterNames[i]) && args[i] instanceof Long longArg) {
-//                return longArg;
-//            }
-//        }
-//        return null;
-//    }
+    private Long getTaskId(TaskActivityLog taskActivityLog, JoinPoint joinPoint, Object response) {
+        if(taskActivityLog.type().equals(ActivityType.TASK_CREATED)) {
+            return getTaskIdFromResponseDto(response);
+        } else {
+            return getTaskIdFromRequestParams(joinPoint);
+        }
+    }
+
+    private Long getTaskIdFromResponseDto(Object response) {
+        if (
+                response instanceof ResponseEntity<?> entity
+                && entity.getBody() instanceof ApiResponse<?> apiResponse
+                && apiResponse.getData() instanceof TaskCreateResponseDto dto
+        ) {
+            return dto.getId();
+        }
+        return null;
+    }
+
+    private Long getTaskIdFromRequestParams(JoinPoint joinPoint) {
+        MethodSignature signature = (MethodSignature) joinPoint.getSignature();
+        String[] parameterNames = signature.getParameterNames();
+        Object[] args = joinPoint.getArgs();
+
+        for (int i = 0; i < parameterNames.length; i++) {
+            if ("taskId".equals(parameterNames[i]) && args[i] instanceof Long longArg) {
+                return longArg;
+            }
+        }
+        return null;
+    }
 }
