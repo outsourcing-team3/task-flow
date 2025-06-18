@@ -1,8 +1,6 @@
 package com.example.outsourcingproject.domain.task.controller;
 
-import com.example.outsourcingproject.domain.task.dto.TaskCreateRequestDto;
-import com.example.outsourcingproject.domain.task.dto.TaskCreateResponseDto;
-import com.example.outsourcingproject.domain.task.dto.TaskReadResponseDto;
+import com.example.outsourcingproject.domain.task.dto.*;
 import com.example.outsourcingproject.domain.task.service.TaskService;
 import com.example.outsourcingproject.global.dto.ApiResponse;
 import com.example.outsourcingproject.global.security.UserPrincipal;
@@ -13,6 +11,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+
 
 @RestController
 @RequestMapping
@@ -49,5 +48,31 @@ public class TaskController {
         TaskReadResponseDto getTask = taskService.getTaskById(taskId);
         return ResponseEntity.ok(ApiResponse.success(getTask, "[ " + getTask.getTitle() + "] Task 를 조회하였습니다."));
     }
+
+    // 특정 Task 수정 - 제목, 내용, 우선순위, 담당자, 마감일, 시작일
+    @PatchMapping("/tasks/{taskId}")
+    public ResponseEntity<ApiResponse<TaskReadResponseDto>> updateTask(
+            @PathVariable Long taskId,
+            @RequestBody TaskUpdateRequestDto requestDto,
+            @AuthenticationPrincipal UserPrincipal userPrincipal) {
+
+        Long currentUserId = userPrincipal.getId();  // 로그인된 유저의 ID
+        TaskReadResponseDto updatedTask = taskService.updateTask(taskId, requestDto, currentUserId);
+
+        return ResponseEntity.ok(ApiResponse.success(updatedTask, "Task 가 수정되었습니다."));
+    }
+
+    @PatchMapping("/tasks/status/{taskId}")
+    public ResponseEntity<ApiResponse<TaskReadResponseDto>> updateStatusTask(
+            @PathVariable Long taskId,
+            @RequestBody TaskStatusUpdateRequestDto requestDto,
+            @AuthenticationPrincipal UserPrincipal userPrincipal) {
+
+        Long currentUserId = userPrincipal.getId();  // 로그인된 유저의 ID
+        TaskReadResponseDto updateTaskStatus = taskService.updateTaskStatus(taskId, requestDto, currentUserId);
+
+        return ResponseEntity.ok(ApiResponse.success(updateTaskStatus, "Task 상태가 [" + updateTaskStatus.getStatus() + "] (으)로 변경되었습니다."));
+    }
+
 
 }
