@@ -1,9 +1,11 @@
 package com.example.outsourcingproject.domain.task.entity;
 
+import com.example.outsourcingproject.domain.task.enums.TaskStatus;
 import com.example.outsourcingproject.domain.user.entity.User;
 import com.example.outsourcingproject.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 
@@ -33,14 +35,18 @@ public class Task extends BaseEntity {
 
     private LocalDateTime deadline;
 
-    private String status;
+    @Setter
+    @Enumerated(EnumType.STRING)
+    private TaskStatus status;
 
     private LocalDateTime startedAt;
 
     public Task() {
     }
 
-    public Task(String title, String description, String priority, User assignee, User creator, String status, LocalDateTime deadline, LocalDateTime startedAt) {
+    public Task(String title, String description, String priority, User assignee, User creator,
+                TaskStatus status, LocalDateTime deadline, LocalDateTime startedAt)
+    {
         this.title = title;
         this.description = description;
         this.priority = priority;
