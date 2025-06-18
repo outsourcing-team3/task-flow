@@ -20,6 +20,8 @@ public class TaskCreateRequestDto {
 
     private String assigneeName;
 
+    private String status;
+
     private LocalDateTime deadline;
 
     private LocalDateTime startedAt;
