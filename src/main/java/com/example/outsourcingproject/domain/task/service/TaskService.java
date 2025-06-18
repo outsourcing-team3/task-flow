@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -37,42 +36,38 @@ public class TaskService {
                 .orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND, "Does not exist id = " + currentUserId));
 
         // 요청 데이터에서 assigneeName 값이 없을 경우 기본값으로 creator 로 처리
-        String assigneeName = Optional.ofNullable(requestDto.getAssigneeName()).filter(name -> !name.isBlank()).orElse(creator.getName());
+        String assigneeName = Optional.ofNullable(requestDto.getAssigneeName())
+                .filter(name -> !name.isBlank())
+                .orElse(creator.getName());
 
+        // assigneeName 으로 유저 정보 찾기
         User assignee = userRepository.findAll().stream()
                 .filter(user -> user.getName().equals(assigneeName))
                 .findFirst()
-                .orElseThrow(() -> { log.warn("유저 이름 '{}'에 해당하는 ID 없음", assigneeName);
-                    return new ResponseStatusException(HttpStatus.NOT_FOUND, "Assignee name not found: " + assigneeName);
-        });
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Assignee name not found: " + assigneeName));
 
-        // description 기본값 처리
-        String description = Optional.ofNullable(requestDto.getDescription()).filter(desc -> !desc.isBlank()).orElse("No description provided.");
-
-        // priority 기본값 처리
+        // priority 값 검증
         Priority priority = Optional.ofNullable(requestDto.getPriority())
-                .filter(pr -> !pr.isBlank())
-                .map(Priority::fromString)
-                .orElse(Priority.MEDIUM);
+                .map(p -> {
+                    try {
+                        return Priority.valueOf(p); // Enum 값이 유효한지 확인
+                    } catch (IllegalArgumentException e) {
+                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "잘못된 우선순위 입니다: " + p); // 잘못된 값일 경우 예외 처리
+                    }
+                })
+                .orElse(Priority.MEDIUM);  // null 일 경우
 
-        // status 기본값 처리
-        TaskStatus status = TaskStatus.TODO;
-
-        // deadline 기본값 처리
-        LocalDateTime deadline = Optional.ofNullable(requestDto.getDeadline()).orElse(LocalDate.now().plusDays(7).atStartOfDay());
-
-        // started 날짜 기본값 처리
-        LocalDateTime startedAt = Optional.ofNullable(requestDto.getStartedAt()).orElse(LocalDateTime.now());
+        TaskStatus taskStatus = TaskStatus.TODO;
 
         Task newTask = new Task(
                 requestDto.getTitle(),
-                description,
+                requestDto.getDescription(),
                 priority,
                 assignee,
                 creator,
-                status,
-                deadline,
-                startedAt
+                taskStatus,
+                requestDto.getDeadline(),
+                requestDto.getStartedAt()
         );
 
         taskRepository.save((newTask));
@@ -80,11 +75,7 @@ public class TaskService {
         return TaskCreateResponseDto.toDto(newTask);
     }
 
-    // Task 조회 - 전체 (기존)
-//    public List<TaskReadResponseDto> getAllTasks() {
-//        return taskRepository.findAllByIsDeletedFalse().stream().map(TaskReadResponseDto::toDto).toList();
-//    }
-
+    // Task 조회 - 전체
     public List<TaskReadResponseDto> getTasksByStatus(Optional<TaskStatus> status) {
         List<Task> tasks;
 
@@ -96,6 +87,22 @@ public class TaskService {
         }
 
         return tasks.stream().map(TaskReadResponseDto::toDto).toList();
+    }
+
+    // Task 조회 - 제목(title) 검색
+    public List<TaskReadResponseDto> searchTasksByTitle(String searchText) {
+
+        List<Task> searchResult = taskRepository.findByTitleContaining(searchText);
+
+        return searchResult.stream().map(TaskReadResponseDto::toDto).toList();
+    }
+
+    // Task 조회 - 내용(description) 검색
+    public List<TaskReadResponseDto> searchTasksByDescription(String searchText) {
+
+        List<Task> searchResult = taskRepository.findByDescriptionContaining(searchText);
+
+        return searchResult.stream().map(TaskReadResponseDto::toDto).toList();
     }
 
 
