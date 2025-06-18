@@ -8,14 +8,11 @@ import com.example.outsourcingproject.domain.task.enums.TaskStatus;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.PageRequest;
 
-
 import lombok.RequiredArgsConstructor;
-
 
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -34,9 +31,9 @@ public class DashboardService {
     private final TaskStatisticsRepository taskStatisticsRepository;
     private final AcitivityFeedRepository acitivityFeedRepository;
 
-
     /**
-     * 기준일(date)을 포함한 주(월~일)와 그 전 주를 비교해 통계와 주간 증감률을 반환. 날짜를 적지 않으면 deafult = 오늘
+     * 기준일(date)을 포함한 주(월~일)와 그 전 주를 비교해 통계와 주간 증감률을 반환.
+     * 날짜를 적지 않으면 deafult = 오늘
      */
     public DashboardStatisticsDto getWeeklyStatistics(LocalDate date) {
 
@@ -67,7 +64,6 @@ public class DashboardService {
 
 
         //주간 증가율 계산
-
         long lastWeekTotal = taskStatisticsRepository.countByCreatedAtBetween(prevWeekStart, prevWeekEnd);
 
         double weeklyChangeRate = (lastWeekTotal == 0)
@@ -88,6 +84,7 @@ public class DashboardService {
     }
 
 
+    // 비율 계산 유틸
     private double rate(long part, long total) {
         return (total == 0) ? 0.0 : Math.round(part * 10000.0 / total) / 100.0;
     }
@@ -131,7 +128,10 @@ public class DashboardService {
 
 
 
-    // 1주간(입력한 날짜가 속한 주의 월요일~일요일) 작업 트렌드 반환. 날짜를 적지 않으면 deafult = 오늘
+    /**
+     * 입력한 날짜가 속한 주의 월~일 작업 추이
+     * 날짜를 적지 않으면 deafult = 오늘
+     */
     public List<DailyTaskTrendDto> getWeeklyTrend(LocalDate date) {
         LocalDate baseDate = (date != null) ? date : LocalDate.now();
         // 기준 날짜가 속한 주의 월요일 00:00부터
@@ -147,7 +147,10 @@ public class DashboardService {
 
     }
 
-    //작업 상태
+
+    /**
+     * 전체 작업 상태 비율 반환 (TODO, IN_PROGRESS, DONE)
+     */
     public TaskStatusRatioDto getStatusRatio() {
 
         List<TaskStatusCountDto> result = taskStatisticsRepository.countGroupByStatus();
@@ -166,7 +169,9 @@ public class DashboardService {
 
     }
 
-    //진행률 계산
+    /**
+     * 내 작업과 팀 전체 작업의 완료율 비교
+     */
     public ProgressRatioDto getProgressRatio(Long userId) {
 
         //내 상태별 카운트
@@ -190,6 +195,7 @@ public class DashboardService {
     }
 
 
+    // 리스트를 상태별 Map으로 변환
     private Map<TaskStatus, Long> toMap(List<TaskStatusCountDto> list) {
 
         return list.stream()
@@ -200,7 +206,9 @@ public class DashboardService {
     }
 
 
-    //월별 추세 구하기
+    /**
+     * 올해 1~12월 월별 작업/완료 수 트렌드 반환
+     */
     public List<MonthlyTaskTrendDto> getMonthlyTrend() {
         int year = Year.now().getValue();
 
@@ -226,7 +234,9 @@ public class DashboardService {
     }
 
 
-    //활동 피드 가져오기
+    /**
+     * 최근 일주일간 활동 피드 최신순 5개 반환
+     */
     public List<ActivityFeedDto> getAcitivityFeed() {
         LocalDateTime to = LocalDateTime.now();
         LocalDateTime from = to.minusDays(7);
