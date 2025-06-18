@@ -75,6 +75,7 @@ public class TaskService {
         return TaskCreateResponseDto.toDto(newTask);
     }
 
+    // Task 조회 - 전체
     public List<TaskReadResponseDto> getTasksByStatus(Optional<TaskStatus> status) {
         List<Task> tasks;
 
@@ -86,6 +87,22 @@ public class TaskService {
         }
 
         return tasks.stream().map(TaskReadResponseDto::toDto).toList();
+    }
+
+    // Task 조회 - 제목(title) 검색
+    public List<TaskReadResponseDto> searchTasksByTitle(String searchText) {
+
+        List<Task> searchResult = taskRepository.findByTitleContaining(searchText);
+
+        return searchResult.stream().map(TaskReadResponseDto::toDto).toList();
+    }
+
+    // Task 조회 - 내용(description) 검색
+    public List<TaskReadResponseDto> searchTasksByDescription(String searchText) {
+
+        List<Task> searchResult = taskRepository.findByDescriptionContaining(searchText);
+
+        return searchResult.stream().map(TaskReadResponseDto::toDto).toList();
     }
 
 
