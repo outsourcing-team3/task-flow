@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 @Getter
 public class TaskCreateResponseDto {
 
-    private Long Id;
+    private Long id;
 
     private String title;
 
@@ -31,8 +31,8 @@ public class TaskCreateResponseDto {
 
     private LocalDateTime updatedAt;
 
-    public TaskCreateResponseDto(Long Id, String title, String description, TaskStatus status, LocalDateTime deadline, String priority, String assignee, String creator, LocalDateTime startedAt, LocalDateTime createdAt, LocalDateTime updatedAt) {
-        this.Id = Id;
+    public TaskCreateResponseDto(Long id, String title, String description, TaskStatus status, LocalDateTime deadline, String priority, String assignee, String creator, LocalDateTime startedAt, LocalDateTime createdAt, LocalDateTime updatedAt) {
+        this.id = id;
         this.title = title;
         this.description = description;
         this.status = status.name();
