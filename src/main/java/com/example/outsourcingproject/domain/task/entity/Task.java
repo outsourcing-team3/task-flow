@@ -1,5 +1,6 @@
 package com.example.outsourcingproject.domain.task.entity;
 
+import com.example.outsourcingproject.domain.task.enums.Priority;
 import com.example.outsourcingproject.domain.task.enums.TaskStatus;
 import com.example.outsourcingproject.domain.user.entity.User;
 import com.example.outsourcingproject.global.entity.BaseEntity;
@@ -23,7 +24,8 @@ public class Task extends BaseEntity {
     @Column(columnDefinition = "longtext")
     private String description;
 
-    private String priority;
+    @Enumerated(EnumType.STRING)
+    private Priority priority;
 
     @ManyToOne
     @JoinColumn(name = "assignee_id")
@@ -44,7 +46,7 @@ public class Task extends BaseEntity {
     public Task() {
     }
 
-    public Task(String title, String description, String priority, User assignee, User creator,
+    public Task(String title, String description, Priority priority, User assignee, User creator,
                 TaskStatus status, LocalDateTime deadline, LocalDateTime startedAt)
     {
         this.title = title;
