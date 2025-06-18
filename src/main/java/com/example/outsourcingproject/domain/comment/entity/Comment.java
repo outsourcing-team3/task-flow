@@ -1,11 +1,11 @@
 package com.example.outsourcingproject.domain.comment.entity;
 
+import com.example.outsourcingproject.domain.task.entity.Task;
 import com.example.outsourcingproject.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
-import org.springframework.scheduling.config.Task;
 
 import java.time.LocalDateTime;
 
@@ -37,9 +37,9 @@ public class Comment {
     @JoinColumn(name = "task_id", nullable = false)
     private Task task;
 
-    // Soft Delete
+    @Builder.Default
     @Column(nullable = false)
-    private final boolean isDeleted = false;
+    private boolean isDeleted = false;
 
     @Column(nullable = false)
     private LocalDateTime createdAt;

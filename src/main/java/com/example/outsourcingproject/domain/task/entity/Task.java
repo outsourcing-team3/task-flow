@@ -9,8 +9,8 @@ import lombok.Setter;
 
 import java.time.LocalDateTime;
 
-@Getter
 @Entity
+@Getter
 @Table(name = "tasks")
 public class Task extends BaseEntity {
 
