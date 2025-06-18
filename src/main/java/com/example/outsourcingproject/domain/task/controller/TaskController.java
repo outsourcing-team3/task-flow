@@ -2,7 +2,9 @@ package com.example.outsourcingproject.domain.task.controller;
 
 import com.example.outsourcingproject.domain.task.dto.*;
 import com.example.outsourcingproject.domain.task.service.TaskService;
+import com.example.outsourcingproject.global.aop.annotation.TaskActivityLog;
 import com.example.outsourcingproject.global.dto.ApiResponse;
+import com.example.outsourcingproject.global.enums.ActivityType;
 import com.example.outsourcingproject.global.security.UserPrincipal;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -21,6 +23,7 @@ public class TaskController {
     private final TaskService taskService;
 
     // Task 생성
+    @TaskActivityLog(type = ActivityType.TASK_CREATED)
     @PostMapping("/tasks")
     public ResponseEntity<ApiResponse<TaskCreateResponseDto>> createTask(@AuthenticationPrincipal UserPrincipal userPrincipal, @RequestBody TaskCreateRequestDto requestDto) {
 
@@ -50,6 +53,7 @@ public class TaskController {
     }
 
     // 특정 Task 수정 - 제목, 내용, 우선순위, 담당자, 마감일, 시작일
+    @TaskActivityLog(type = ActivityType.TASK_UPDATED)
     @PatchMapping("/tasks/{taskId}")
     public ResponseEntity<ApiResponse<TaskReadResponseDto>> updateTask(
             @PathVariable Long taskId,
@@ -63,6 +67,7 @@ public class TaskController {
     }
 
     @PatchMapping("/tasks/status/{taskId}")
+    @TaskActivityLog(type = ActivityType.TASK_STATUS_CHANGED)
     public ResponseEntity<ApiResponse<TaskReadResponseDto>> updateStatusTask(
             @PathVariable Long taskId,
             @RequestBody TaskStatusUpdateRequestDto requestDto,
