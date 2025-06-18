@@ -13,6 +13,7 @@ import java.util.List;
 public interface AcitivityFeedRepository extends JpaRepository<ActivityLog, Long> {
 
 
+    /*활동 피드 조회*/
     @Query("""
             SELECT new com.example.outsourcingproject.domain.dashboard.dto.ActivityFeedDto(
                   u.name,

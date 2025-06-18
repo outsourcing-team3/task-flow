@@ -21,8 +21,11 @@ import java.util.List;
 @Repository
 public interface TaskStatisticsRepository extends JpaRepository<Task, Long> {
 
+    // ==========================  통계용 조회 ==========================
 
-    //기간 내 전체 task 개수
+    /**
+     * 기간 내 전체 태스크 개수 조회 (createdAt 기준)
+     */
     @Query("""
             SELECT COUNT(t)
             FROM Task t
@@ -35,8 +38,9 @@ public interface TaskStatisticsRepository extends JpaRepository<Task, Long> {
                                  @Param("to") LocalDateTime to);
 
 
-    //기간+상태별 task 수
-
+    /**
+     * 기간 + 상태 조건에 따른 태스크 개수 조회
+     */
     @Query("""
             SELECT COUNT(t)
             FROM Task t
@@ -49,6 +53,29 @@ public interface TaskStatisticsRepository extends JpaRepository<Task, Long> {
                                 @Param("to") LocalDateTime to);
 
 
+
+    /**
+     * 기간 내 마감 기한이 지나간 태스크 개수 조회 (overdue)
+     */
+    @Query("""
+                SELECT COUNT(t)
+                FROM Task t
+                WHERE t.status IN (:statuses)
+                  AND t.deadline < :now
+                  AND t.deadline BETWEEN :from AND :to
+                  AND t.isDeleted = false
+            """)
+    long countOverdueTasksInPeriod(@Param("statuses") List<TaskStatus> statuses,
+                                   @Param("now") LocalDateTime now,
+                                   @Param("from") LocalDateTime from, //weekStart
+                                   @Param("to") LocalDateTime to); //weekEnd
+
+
+    // ========================== 오늘 작업 ==========================
+
+    /**
+     * 오늘 마감 예정이고 기한이 남은 할 일 5개 조회 (TO-DO, IN_PROGRESS)
+     */
     @Query("""
             SELECT new com.example.outsourcingproject.domain.dashboard.dto.TodayTaskItemDto(
                     t.id, t.title, t.status, t.priority, t.deadline)
@@ -69,7 +96,9 @@ public interface TaskStatisticsRepository extends JpaRepository<Task, Long> {
     );
 
 
-//
+// /**
+// //     * 날짜 기준으로 특정 유저의 할 일 조회 (사용 안함)
+// //     */
 //    @Query("""
 //            SELECT t
 //            FROM Task t
@@ -83,22 +112,13 @@ public interface TaskStatisticsRepository extends JpaRepository<Task, Long> {
 //                                      @Param("statuses") List<TaskStatus> statuses);
 
 
-    @Query("""
-                SELECT COUNT(t)
-                FROM Task t
-                WHERE t.status IN (:statuses)
-                  AND t.deadline < :now
-                  AND t.deadline BETWEEN :from AND :to
-                  AND t.isDeleted = false
-            """)
-    long countOverdueTasksInPeriod(@Param("statuses") List<TaskStatus> statuses,
-                                   @Param("now") LocalDateTime now,
-                                   @Param("from") LocalDateTime from, //weekStart
-                                   @Param("to") LocalDateTime to); //weekEnd
 
 
-    /*최근 7일간 날짜 별 태스크 생성 갯수 및 완료 수
-    일별 작업 트렌드 그래프 용 (createdAt 기준)*/
+    // ==========================  주간 트렌드 ==========================
+
+    /**
+     * 최근 7일간 일자별 태스크 생성/완료 수 조회 (native, created_at 기준)
+     */
     @Query(value = """
                 SELECT DATE(t.created_at) AS date,
                        COUNT(*) AS totalCount,
@@ -112,8 +132,11 @@ public interface TaskStatisticsRepository extends JpaRepository<Task, Long> {
     List<DailyTaskTrendProjection> fetchDailyTrend(@Param("start") LocalDateTime start,
                                                    @Param("end") LocalDateTime end);
 
-    /*전체 태스크 상태별 개수 통계
-    전체 비율 통계 계산용*/
+    // ========================== 상태 비율 ==========================
+
+    /**
+     * 전체 태스크 상태별 개수 통계 (전체 비율용)
+     */
     @Query("""
                 SELECT new com.example.outsourcingproject.domain.dashboard.dto.TaskStatusCountDto(
                     t.status,
@@ -126,7 +149,10 @@ public interface TaskStatisticsRepository extends JpaRepository<Task, Long> {
     List<TaskStatusCountDto> countGroupByStatus();
 
 
-    //특정 유저(로그인 한 사용자)의 상태별 태스크 개수(개인 비율 계산용)
+
+    /**
+     * 특정 유저의 상태별 태스크 개수 (개인 진행률용)
+     */
     @Query("""
                      SELECT new com.example.outsourcingproject.domain.dashboard.dto.TaskStatusCountDto(
                                 t.status, COUNT(t))
@@ -138,7 +164,9 @@ public interface TaskStatisticsRepository extends JpaRepository<Task, Long> {
     List<TaskStatusCountDto> countMyStatus(@Param("userId") Long userId);
 
 
-    //전체 팀의 상태별 태스크 개수 (팀 비율 계산용)
+    /**
+     * 전체 팀의 상태별 태스크 개수 (팀 진행률용)
+     */
     @Query("""
                 SELECT new com.example.outsourcingproject.domain.dashboard.dto.TaskStatusCountDto(
                        t.status,
@@ -150,8 +178,12 @@ public interface TaskStatisticsRepository extends JpaRepository<Task, Long> {
     List<TaskStatusCountDto> countTeamStatus();
 
 
-    /*특정 연도에 월 단위로 생성도니 태스크 개수 및 완료 개수
-    월간 그래프 용*/
+
+    // ========================== 월간 트렌드 ==========================
+
+    /**
+     * 월별 태스크 생성/완료 수 조회 (특정 연도 기준, native)
+     */
     @Query(value = """
                 SELECT MONTH(t.created_at) AS month,
                        COUNT(*) AS totalCount,
