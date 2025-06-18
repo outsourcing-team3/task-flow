@@ -52,24 +52,26 @@ public class TaskController {
     // 특정 Task 수정 - 제목, 내용, 우선순위, 담당자, 마감일, 시작일
     @PatchMapping("/tasks/{taskId}")
     public ResponseEntity<ApiResponse<TaskReadResponseDto>> updateTask(
+            @AuthenticationPrincipal UserPrincipal userPrincipal,
             @PathVariable Long taskId,
-            @RequestBody TaskUpdateRequestDto requestDto,
-            @AuthenticationPrincipal UserPrincipal userPrincipal) {
+            @RequestBody TaskUpdateRequestDto requestDto
+            ) {
 
         Long currentUserId = userPrincipal.getId();  // 로그인된 유저의 ID
-        TaskReadResponseDto updatedTask = taskService.updateTask(taskId, requestDto, currentUserId);
+        TaskReadResponseDto updatedTask = taskService.updateTask(currentUserId, taskId, requestDto);
 
         return ResponseEntity.ok(ApiResponse.success(updatedTask, "Task 가 수정되었습니다."));
     }
 
     @PatchMapping("/tasks/status/{taskId}")
     public ResponseEntity<ApiResponse<TaskReadResponseDto>> updateStatusTask(
+            @AuthenticationPrincipal UserPrincipal userPrincipal,
             @PathVariable Long taskId,
-            @RequestBody TaskStatusUpdateRequestDto requestDto,
-            @AuthenticationPrincipal UserPrincipal userPrincipal) {
+            @RequestBody TaskStatusUpdateRequestDto requestDto
+            ) {
 
         Long currentUserId = userPrincipal.getId();  // 로그인된 유저의 ID
-        TaskReadResponseDto updateTaskStatus = taskService.updateTaskStatus(taskId, requestDto, currentUserId);
+        TaskReadResponseDto updateTaskStatus = taskService.updateTaskStatus(currentUserId, taskId, requestDto);
 
         return ResponseEntity.ok(ApiResponse.success(updateTaskStatus, "Task 상태가 [" + updateTaskStatus.getStatus() + "] (으)로 변경되었습니다."));
     }
