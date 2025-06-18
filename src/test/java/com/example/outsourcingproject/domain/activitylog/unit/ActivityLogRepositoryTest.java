@@ -39,13 +39,11 @@ public class ActivityLogRepositoryTest {
         Auth auth = new Auth("홍길동", "test1234", "test@gmail.com", "test1234", UserRole.USER);
         auth = authRepository.save(auth);
 
-        User user = new User(auth.getId(), auth.getName(), auth.getEmail());
-        user = userRepository.save(user);
-
         ActivityLog activityLog = new ActivityLog(
-                user,
+                auth,
                 ActivityType.USER_LOGGED_IN,
                 TargetType.USER,
+                auth.getId(),
                 "로그인 완료",
                 "127.0.0.1",
                 RequestMethod.POST,
