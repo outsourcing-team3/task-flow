@@ -9,6 +9,8 @@ import java.time.LocalDateTime;
 @Getter
 public class TaskCreateResponseDto {
 
+    private Long taskId;
+
     private String title;
 
     private String description;
@@ -29,7 +31,8 @@ public class TaskCreateResponseDto {
 
     private LocalDateTime updatedAt;
 
-    public TaskCreateResponseDto(String title, String description, TaskStatus status, LocalDateTime deadline, String priority, String assignee, String creator, LocalDateTime startedAt, LocalDateTime createdAt, LocalDateTime updatedAt) {
+    public TaskCreateResponseDto(Long taskId, String title, String description, TaskStatus status, LocalDateTime deadline, String priority, String assignee, String creator, LocalDateTime startedAt, LocalDateTime createdAt, LocalDateTime updatedAt) {
+        this.taskId = taskId;
         this.title = title;
         this.description = description;
         this.status = status.name();
@@ -44,6 +47,7 @@ public class TaskCreateResponseDto {
 
     public static TaskCreateResponseDto toDto(Task task) {
         return new TaskCreateResponseDto(
+                task.getId(),
                 task.getTitle(),
                 task.getDescription(),
                 task.getStatus(),
