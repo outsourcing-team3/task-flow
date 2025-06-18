@@ -1,5 +1,6 @@
 package com.example.outsourcingproject.domain.task.enums;
 
+import com.example.outsourcingproject.domain.task.exception.TaskException;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.Getter;
@@ -30,7 +31,7 @@ public enum Priority {
                 return priority;
             }
         }
-        throw new IllegalArgumentException("잘못된 우선순위 [" + value + "] 를 입력하셨습니다. ");
+        throw new TaskException(TaskErrorCode.INVALID_TASK_PRIORITY);
     }
 
 }
