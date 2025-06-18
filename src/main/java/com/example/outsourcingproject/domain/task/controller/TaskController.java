@@ -47,6 +47,18 @@ public class TaskController {
         return ResponseEntity.ok(ApiResponse.success(getTasks, "모든 Task 를 조회하였습니다."));
     }
 
+    @GetMapping("/tasks/search/title")
+    public ResponseEntity<ApiResponse<List<TaskReadResponseDto>>> searchByTitle(@RequestParam String searchText) {
+        List<TaskReadResponseDto> searchTasks = taskService.searchTasksByTitle(searchText);
+        return ResponseEntity.ok(ApiResponse.success(searchTasks, "[" + searchText + "] 제목이 포함된 Task 를 조회하였습니다."));
+    }
+
+    @GetMapping("/tasks/search/desc")
+    public ResponseEntity<ApiResponse<List<TaskReadResponseDto>>> searchByDescription(@RequestParam String searchText) {
+        List<TaskReadResponseDto> searchTasks = taskService.searchTasksByDescription(searchText);
+        return ResponseEntity.ok(ApiResponse.success(searchTasks, "[" + searchText + "] 내용이 포함된 Task 를 조회하였습니다."));
+    }
+
     // Task - 단건 조회
     @GetMapping("/tasks/{taskId}")
     public ResponseEntity<ApiResponse<TaskReadResponseDto>> getTaskById(@PathVariable Long taskId) {

@@ -1,8 +1,6 @@
 package com.example.outsourcingproject.domain.task.dto;
 
 import com.example.outsourcingproject.domain.task.entity.Task;
-import com.example.outsourcingproject.domain.task.enums.Priority;
-import com.example.outsourcingproject.domain.task.enums.TaskStatus;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
@@ -22,7 +20,7 @@ public class TaskCreateResponseDto {
 
     private String priority;
 
-    private String assignee;
+    private String assigneeName;
 
     private String creator;
 
@@ -32,14 +30,20 @@ public class TaskCreateResponseDto {
 
     private LocalDateTime updatedAt;
 
-    public TaskCreateResponseDto(Long id, String title, String description, TaskStatus status, LocalDateTime deadline, Priority priority, String assignee, String creator, LocalDateTime startedAt, LocalDateTime createdAt, LocalDateTime updatedAt) {
+    public TaskCreateResponseDto(Long id, String title, String description,
+                                 String status,
+                                 LocalDateTime deadline, String priority, String assigneeName,
+                                 String creator,
+                                 LocalDateTime startedAt, LocalDateTime createdAt,
+                                 LocalDateTime updatedAt
+    ) {
         this.id = id;
         this.title = title;
         this.description = description;
-        this.status = status.name();
+        this.status = status;
         this.deadline = deadline;
-        this.priority = priority.name();
-        this.assignee = assignee;
+        this.priority = priority;
+        this.assigneeName = assigneeName;
         this.creator = creator;
         this.startedAt = startedAt;
         this.createdAt = createdAt;
@@ -51,9 +55,9 @@ public class TaskCreateResponseDto {
                 task.getId(),
                 task.getTitle(),
                 task.getDescription(),
-                task.getStatus(),
+                task.getStatus().name(),
                 task.getDeadline(),
-                task.getPriority(),
+                task.getPriority().name(),
                 task.getAssignee().getName(),
                 task.getCreator().getName(),
                 task.getStartedAt(),
