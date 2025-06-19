@@ -19,7 +19,7 @@ public class TaskReadResponseDto {
 
     private String status;
 
-    private LocalDateTime deadline;
+    private LocalDateTime dueDate;
 
     private String priority;
 
@@ -39,7 +39,7 @@ public class TaskReadResponseDto {
         this.title = title;
         this.description = description;
         this.status = status.name();
-        this.deadline = deadline;
+        this.dueDate = deadline;
         this.priority = priority.name();
         this.assignee = assignee;
         this.creator = creator;

@@ -96,6 +96,8 @@ CREATE TABLE tasks
     is_deleted BOOLEAN NOT NULL DEFAULT FALSE COMMENT '삭제 여부',
     created_at DATETIME NOT NULL COMMENT '생성일',
     updated_at DATETIME NOT NULL COMMENT '수정일',
+    created_by BIGINT COMMENT '생성자 ID',
+    last_modified_by BIGINT COMMENT '수정자 ID',
     deleted_at DATETIME COMMENT '삭제일',
 
     PRIMARY KEY (id),
@@ -116,7 +118,7 @@ CREATE TABLE comments (
     deleted_at DATETIME COMMENT '삭제일',
 
     PRIMARY KEY (id),
-    FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (user_id) REFERENCES auth(id),
     FOREIGN KEY (task_id) REFERENCES tasks(id),
 
     INDEX idx_comments_task_id (task_id),

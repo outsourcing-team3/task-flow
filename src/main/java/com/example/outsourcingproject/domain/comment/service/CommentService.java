@@ -1,5 +1,8 @@
 package com.example.outsourcingproject.domain.comment.service;
 
+import com.example.outsourcingproject.domain.auth.entity.Auth;
+import com.example.outsourcingproject.domain.auth.exception.UserNotFoundException;
+import com.example.outsourcingproject.domain.auth.repository.AuthRepository;
 import com.example.outsourcingproject.domain.comment.dto.CommentRequestDto;
 import com.example.outsourcingproject.domain.comment.dto.CommentResponseDto;
 import com.example.outsourcingproject.domain.comment.entity.Comment;
@@ -8,6 +11,7 @@ import com.example.outsourcingproject.domain.comment.exception.error.CustomError
 import com.example.outsourcingproject.domain.comment.repository.CommentRepository;
 import com.example.outsourcingproject.domain.task.entity.Task;
 import com.example.outsourcingproject.domain.task.repository.TaskRepository;
+import com.example.outsourcingproject.domain.user.dto.UserResponseDto;
 import com.example.outsourcingproject.domain.user.entity.User;
 import com.example.outsourcingproject.domain.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
@@ -26,18 +30,19 @@ public class CommentService {
 
     private final CommentRepository commentRepository;
     private final UserRepository userRepository;
+    private final AuthRepository authRepository;
     private final TaskRepository taskRepository;
 
     @Transactional
     public CommentResponseDto createComment(Long taskId, Long userId, CommentRequestDto requestDto) {
-        User user = userRepository.findById(userId)
+        Auth auth = authRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(CustomErrorCode.USER_NOT_FOUND));
 
         Task task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new CustomException(CustomErrorCode.TASK_NOT_FOUND));
 
         Comment comment = Comment.builder()
-                .user(user)
+                .auth(auth)
                 .task(task)
                 .content(requestDto.getContent())
                 .createdAt(LocalDateTime.now())
@@ -64,7 +69,7 @@ public class CommentService {
                 .orElseThrow(() -> new CustomException(CustomErrorCode.COMMENT_NOT_FOUND));
 
         // 🔐 본인 확인
-        if (!comment.getUser().getId().equals(userId)) {
+        if (!comment.getAuth().getId().equals(userId)) {
             throw new CustomException(CustomErrorCode.UNAUTHORIZED);
         }
 

@@ -1,5 +1,6 @@
 package com.example.outsourcingproject.domain.comment.repository;
 
+import com.example.outsourcingproject.domain.auth.entity.Auth;
 import com.example.outsourcingproject.domain.comment.entity.Comment;
 import com.example.outsourcingproject.domain.task.entity.Task;
 import com.example.outsourcingproject.domain.user.entity.User;
@@ -20,7 +21,7 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
 
     List<Comment> findAllByTaskAndContentContainingIgnoreCaseOrderByCreatedAtDesc(Task task, String keyword);
 
-    List<Comment> findAllByUser(User user);
+    List<Comment> findAllByAuth(Auth auth);
 
     List<Comment> findByTaskIdAndIsDeletedFalseOrderByCreatedAtDesc(Long taskId);
 

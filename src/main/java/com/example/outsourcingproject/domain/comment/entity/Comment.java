@@ -1,5 +1,6 @@
 package com.example.outsourcingproject.domain.comment.entity;
 
+import com.example.outsourcingproject.domain.auth.entity.Auth;
 import com.example.outsourcingproject.domain.task.entity.Task;
 import com.example.outsourcingproject.domain.user.entity.User;
 import jakarta.persistence.*;
@@ -26,7 +27,7 @@ public class Comment {
     // 작성자
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    private Auth auth;
 
     // 댓글 내용
     @Column(nullable = false, length = 255)
