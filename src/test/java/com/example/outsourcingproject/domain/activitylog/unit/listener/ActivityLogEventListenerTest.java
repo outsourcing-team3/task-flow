@@ -1,10 +1,11 @@
-package com.example.outsourcingproject.domain.activitylog.unit;
+package com.example.outsourcingproject.domain.activitylog.unit.listener;
 
 import com.example.outsourcingproject.domain.activitylog.domain.model.ActivityLog;
 import com.example.outsourcingproject.domain.activitylog.domain.repository.ActivityLogRepository;
 import com.example.outsourcingproject.domain.activitylog.listener.ActivityLogEventListener;
-import com.example.outsourcingproject.domain.user.entity.User;
-import com.example.outsourcingproject.domain.user.repository.UserRepository;
+import com.example.outsourcingproject.domain.auth.entity.Auth;
+import com.example.outsourcingproject.domain.auth.enums.UserRole;
+import com.example.outsourcingproject.domain.auth.repository.AuthRepository;
 import com.example.outsourcingproject.global.aop.event.dto.ActivityLogEventDto;
 import com.example.outsourcingproject.global.enums.ActivityType;
 import com.example.outsourcingproject.global.enums.RequestMethod;
@@ -25,7 +26,7 @@ import static org.mockito.Mockito.when;
 public class ActivityLogEventListenerTest {
 
     @Mock
-    UserRepository userRepository;
+    AuthRepository authRepository;
 
     @Mock
     ActivityLogRepository activityLogRepository;
@@ -41,27 +42,23 @@ public class ActivityLogEventListenerTest {
                 userId,
                 ActivityType.USER_LOGGED_IN,
                 TargetType.USER,
-                123123L,
-                "테스트",
+                userId,
+                ActivityType.USER_LOGGED_IN.getMessage1(),
                 "127.0.0.1",
                 RequestMethod.GET,
-                "/api/test"
+                "/api/auth/login"
         );
 
-        User user = new User(
-                1L,
-                "홍길동",
-                "test@gmail.com"
-        );
+        Auth auth = new Auth("홍길동", "test1234", "test@gmail.com", "test1234", UserRole.USER);
 
-        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(authRepository.findById(userId)).thenReturn(Optional.of(auth));
         when(activityLogRepository.save(any(ActivityLog.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         // when
         listener.handleActivityLogEvent(event);
 
         // then
-        verify(userRepository).findById(userId);
+        verify(authRepository).findById(userId);
         verify(activityLogRepository).save(any(ActivityLog.class));
     }
 }

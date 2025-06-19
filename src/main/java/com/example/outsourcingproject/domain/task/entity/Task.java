@@ -8,6 +8,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -46,16 +47,28 @@ public class Task extends BaseEntity {
     public Task() {
     }
 
+
     public Task(String title, String description, Priority priority, User assignee, User creator,
                 TaskStatus status, LocalDateTime deadline, LocalDateTime startedAt)
     {
         this.title = title;
-        this.description = description;
+        this.description = description != null && !description.isBlank() ? description : "No description provided.";
         this.priority = priority;
         this.assignee = assignee;
         this.creator = creator;
         this.status = status;
-        this.deadline = deadline;
-        this.startedAt = startedAt;
+        this.deadline = deadline != null ? deadline : LocalDate.now().plusDays(7).atStartOfDay();
+        this.startedAt = startedAt != null ? startedAt : LocalDateTime.now();
     }
+
+    public void updateTask(String title, String description, Priority priority, User assignee, LocalDateTime deadline, LocalDateTime startedAt) {
+        this.title = title != null ? title : this.title;
+        this.description = description != null ? description : this.description;
+        this.priority = priority != null ? priority : this.priority;
+        this.assignee = assignee != null ? assignee : this.assignee;
+        this.deadline = deadline != null ? deadline : this.deadline;
+        this.startedAt = startedAt != null ? startedAt : this.startedAt;
+    }
+
+
 }

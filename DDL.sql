@@ -93,12 +93,10 @@ CREATE TABLE tasks
     status      VARCHAR(20) COMMENT '태스크 상태',
     started_at  DATETIME NOT NULL COMMENT '태스크 시작일',
 
-    is_deleted  BOOLEAN  NOT NULL DEFAULT FALSE COMMENT '삭제 여부',
-    created_at  DATETIME NOT NULL COMMENT '생성일',
-    updated_at  DATETIME NOT NULL COMMENT '수정일',
-    created_by BIGINT COMMENT '생성자 ID (AuditorAware)',
-    last_modified_by BIGINT COMMENT '수정자 ID (AuditorAware)',
-    deleted_at  DATETIME COMMENT '삭제일',
+    is_deleted BOOLEAN NOT NULL DEFAULT FALSE COMMENT '삭제 여부',
+    created_at DATETIME NOT NULL COMMENT '생성일',
+    updated_at DATETIME NOT NULL COMMENT '수정일',
+    deleted_at DATETIME COMMENT '삭제일',
 
     PRIMARY KEY (id),
     FOREIGN KEY (assignee_id) REFERENCES users (id),

@@ -3,17 +3,19 @@ package com.example.outsourcingproject.domain.task.controller;
 import com.example.outsourcingproject.domain.task.dto.*;
 import com.example.outsourcingproject.domain.task.enums.TaskStatus;
 import com.example.outsourcingproject.domain.task.service.TaskService;
-import com.example.outsourcingproject.global.aop.annotation.TaskActivityLog;
+import com.example.outsourcingproject.global.aop.annotation.ActivityLog;
 import com.example.outsourcingproject.global.dto.ApiResponse;
+import com.example.outsourcingproject.global.dto.PagedResponse;
 import com.example.outsourcingproject.global.enums.ActivityType;
+import com.example.outsourcingproject.global.enums.TargetType;
 import com.example.outsourcingproject.global.security.UserPrincipal;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.Optional;
 
 
@@ -25,9 +27,9 @@ public class TaskController {
     private final TaskService taskService;
 
     // Task 생성
-    @TaskActivityLog(type = ActivityType.TASK_CREATED)
+    @ActivityLog(type = ActivityType.TASK_CREATED, target = TargetType.TASK)
     @PostMapping("/tasks")
-    public ResponseEntity<ApiResponse<TaskCreateResponseDto>> createTask(@AuthenticationPrincipal UserPrincipal userPrincipal, @RequestBody TaskCreateRequestDto requestDto) {
+    public ResponseEntity<ApiResponse<TaskCreateResponseDto>> createTask(@AuthenticationPrincipal UserPrincipal userPrincipal, @Valid @RequestBody TaskCreateRequestDto requestDto) {
 
         Long currentUserId = userPrincipal.getId();
 
@@ -42,9 +44,33 @@ public class TaskController {
 
     // Task - 전체 조회 -> 파라미터에 Status 값을 입력할 경우 해당 Status 의 Task만 조회
     @GetMapping("/tasks")
-    public ResponseEntity<ApiResponse<List<TaskReadResponseDto>>> getAllTasks(@RequestParam Optional<TaskStatus> status) {
-        List<TaskReadResponseDto> getTasks = taskService.getTasksByStatus(status);
-        return ResponseEntity.ok(ApiResponse.success(getTasks, "모든 Task 를 조회하였습니다."));
+    public ResponseEntity<ApiResponse<PagedResponse<TaskReadResponseDto>>> getAllTasks(
+            @RequestParam Optional<TaskStatus> status,
+            @RequestParam (defaultValue = "1") int page,
+            @RequestParam (defaultValue = "10") int size
+    ) {
+        PagedResponse<TaskReadResponseDto> getTasks = taskService.getTasksByStatus(status, page, size);
+        return ResponseEntity.ok(ApiResponse.success(getTasks, "Task 를 조회하였습니다."));
+    }
+
+    @GetMapping("/tasks/search/title")
+    public ResponseEntity<ApiResponse<PagedResponse<TaskReadResponseDto>>> searchByTitle(
+            @RequestParam String searchText,
+            @RequestParam (defaultValue = "1") int page,
+            @RequestParam (defaultValue = "10") int size
+    ) {
+        PagedResponse<TaskReadResponseDto> searchTasks = taskService.searchTasksByTitle(searchText, page, size);
+        return ResponseEntity.ok(ApiResponse.success(searchTasks, "[" + searchText + "] 제목이 포함된 Task 를 조회하였습니다."));
+    }
+
+    @GetMapping("/tasks/search/desc")
+    public ResponseEntity<ApiResponse<PagedResponse<TaskReadResponseDto>>> searchByDescription(
+            @RequestParam String searchText,
+            @RequestParam (defaultValue = "1") int page,
+            @RequestParam (defaultValue = "10") int size
+    ) {
+        PagedResponse<TaskReadResponseDto> searchTasks = taskService.searchTasksByDescription(searchText, page, size);
+        return ResponseEntity.ok(ApiResponse.success(searchTasks, "[" + searchText + "] 내용이 포함된 Task 를 조회하였습니다."));
     }
 
     // Task - 단건 조회
@@ -55,12 +81,12 @@ public class TaskController {
     }
 
     // 특정 Task 수정 - 제목, 내용, 우선순위, 담당자, 마감일, 시작일
-    @TaskActivityLog(type = ActivityType.TASK_UPDATED)
+    @ActivityLog(type = ActivityType.TASK_UPDATED, target = TargetType.TASK)
     @PatchMapping("/tasks/{taskId}")
     public ResponseEntity<ApiResponse<TaskReadResponseDto>> updateTask(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @PathVariable Long taskId,
-            @RequestBody TaskUpdateRequestDto requestDto
+            @Valid @RequestBody TaskUpdateRequestDto requestDto
             ) {
 
         Long currentUserId = userPrincipal.getId();  // 로그인된 유저의 ID
@@ -69,12 +95,12 @@ public class TaskController {
         return ResponseEntity.ok(ApiResponse.success(updatedTask, "Task 가 수정되었습니다."));
     }
 
+    @ActivityLog(type = ActivityType.TASK_STATUS_CHANGED, target = TargetType.TASK)
     @PatchMapping("/tasks/status/{taskId}")
-    @TaskActivityLog(type = ActivityType.TASK_STATUS_CHANGED)
     public ResponseEntity<ApiResponse<TaskReadResponseDto>> updateStatusTask(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @PathVariable Long taskId,
-            @RequestBody TaskStatusUpdateRequestDto requestDto
+            @Valid @RequestBody TaskStatusUpdateRequestDto requestDto
             ) {
 
         Long currentUserId = userPrincipal.getId();  // 로그인된 유저의 ID
@@ -83,6 +109,7 @@ public class TaskController {
         return ResponseEntity.ok(ApiResponse.success(updateTaskStatus, "Task 상태가 [" + updateTaskStatus.getStatus() + "] (으)로 변경되었습니다."));
     }
 
+    @ActivityLog(type = ActivityType.TASK_DELETED, target = TargetType.TASK)
     @DeleteMapping("/tasks/{taskId}")
     public ResponseEntity<ApiResponse<String>> deleteTask(@PathVariable Long taskId) {
         taskService.deleteTask(taskId);
