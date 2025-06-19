@@ -5,6 +5,7 @@ import com.example.outsourcingproject.domain.task.enums.TaskStatus;
 import com.example.outsourcingproject.domain.task.service.TaskService;
 import com.example.outsourcingproject.global.aop.annotation.TaskActivityLog;
 import com.example.outsourcingproject.global.dto.ApiResponse;
+import com.example.outsourcingproject.global.dto.PagedResponse;
 import com.example.outsourcingproject.global.enums.ActivityType;
 import com.example.outsourcingproject.global.security.UserPrincipal;
 import lombok.RequiredArgsConstructor;
@@ -13,7 +14,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.Optional;
 
 
@@ -42,20 +42,32 @@ public class TaskController {
 
     // Task - 전체 조회 -> 파라미터에 Status 값을 입력할 경우 해당 Status 의 Task만 조회
     @GetMapping("/tasks")
-    public ResponseEntity<ApiResponse<List<TaskReadResponseDto>>> getAllTasks(@RequestParam Optional<TaskStatus> status) {
-        List<TaskReadResponseDto> getTasks = taskService.getTasksByStatus(status);
-        return ResponseEntity.ok(ApiResponse.success(getTasks, "모든 Task 를 조회하였습니다."));
+    public ResponseEntity<ApiResponse<PagedResponse<TaskReadResponseDto>>> getAllTasks(
+            @RequestParam Optional<TaskStatus> status,
+            @RequestParam (defaultValue = "1") int page,
+            @RequestParam (defaultValue = "10") int size
+    ) {
+        PagedResponse<TaskReadResponseDto> getTasks = taskService.getTasksByStatus(status, page, size);
+        return ResponseEntity.ok(ApiResponse.success(getTasks, "Task 를 조회하였습니다."));
     }
 
     @GetMapping("/tasks/search/title")
-    public ResponseEntity<ApiResponse<List<TaskReadResponseDto>>> searchByTitle(@RequestParam String searchText) {
-        List<TaskReadResponseDto> searchTasks = taskService.searchTasksByTitle(searchText);
+    public ResponseEntity<ApiResponse<PagedResponse<TaskReadResponseDto>>> searchByTitle(
+            @RequestParam String searchText,
+            @RequestParam (defaultValue = "1") int page,
+            @RequestParam (defaultValue = "10") int size
+    ) {
+        PagedResponse<TaskReadResponseDto> searchTasks = taskService.searchTasksByTitle(searchText, page, size);
         return ResponseEntity.ok(ApiResponse.success(searchTasks, "[" + searchText + "] 제목이 포함된 Task 를 조회하였습니다."));
     }
 
     @GetMapping("/tasks/search/desc")
-    public ResponseEntity<ApiResponse<List<TaskReadResponseDto>>> searchByDescription(@RequestParam String searchText) {
-        List<TaskReadResponseDto> searchTasks = taskService.searchTasksByDescription(searchText);
+    public ResponseEntity<ApiResponse<PagedResponse<TaskReadResponseDto>>> searchByDescription(
+            @RequestParam String searchText,
+            @RequestParam (defaultValue = "1") int page,
+            @RequestParam (defaultValue = "10") int size
+    ) {
+        PagedResponse<TaskReadResponseDto> searchTasks = taskService.searchTasksByDescription(searchText, page, size);
         return ResponseEntity.ok(ApiResponse.success(searchTasks, "[" + searchText + "] 내용이 포함된 Task 를 조회하였습니다."));
     }
 
