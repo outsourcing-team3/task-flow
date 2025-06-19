@@ -1,0 +1,47 @@
+# Git
+.git
+.gitignore
+
+# IDE
+.idea
+*.iws
+*.iml
+*.ipr
+.vscode
+
+# Build outputs
+build/
+target/
+!gradle/wrapper/gradle-wrapper.jar
+
+# Test reports
+**/build/reports/
+**/build/test-results/
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+*.log
+
+# Environment files
+.env
+.env.*
+!.env.example
+.env.local
+.env.*.local
+**/src/main/resources/properties/env.properties
+
+# Temporary files
+*.tmp
+*.temp
+
+# Documentation
+*.md
+docs/

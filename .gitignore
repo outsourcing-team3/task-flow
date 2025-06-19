@@ -40,6 +40,9 @@ application-local.properties
 
 ### env ###
 /src/main/resources/properties/env.properties
+.env
+.env.local
+.env.*.local
 
 /src/test/resources/
 **/.DS_Store
