@@ -1,33 +1,25 @@
-package com.example.outsourcingproject.domain.activitylog.unit;
+package com.example.outsourcingproject.domain.activitylog.unit.repository;
 
 import com.example.outsourcingproject.domain.activitylog.domain.model.ActivityLog;
 import com.example.outsourcingproject.domain.activitylog.domain.repository.ActivityLogRepository;
 import com.example.outsourcingproject.domain.auth.entity.Auth;
 import com.example.outsourcingproject.domain.auth.enums.UserRole;
 import com.example.outsourcingproject.domain.auth.repository.AuthRepository;
-import com.example.outsourcingproject.domain.user.entity.User;
-import com.example.outsourcingproject.domain.user.repository.UserRepository;
-import com.example.outsourcingproject.global.config.JpaConfig;
 import com.example.outsourcingproject.global.enums.ActivityType;
 import com.example.outsourcingproject.global.enums.RequestMethod;
 import com.example.outsourcingproject.global.enums.TargetType;
-import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.context.annotation.Import;
+import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
-@Slf4j
 @DataJpaTest
-@Import(JpaConfig.class)
+@EnableJpaAuditing
 public class ActivityLogRepositoryTest {
 
     @Autowired
     ActivityLogRepository activityLogRepository;
-
-    @Autowired
-    UserRepository userRepository;
 
     @Autowired
     AuthRepository authRepository;
@@ -56,5 +48,4 @@ public class ActivityLogRepositoryTest {
         //then
         Assertions.assertThat(savedActivityLog.getId()).isNotNull();
     }
-
 }
