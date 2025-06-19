@@ -45,6 +45,9 @@ public class TaskService {
         // assigneeName 으로 유저 정보 찾기
         User assignee = findUserName(assigneeName);
 
+        String title = Optional.ofNullable(requestDto.getTitle()).filter(t -> !t.trim().isEmpty()).orElseThrow(() -> new TaskException(TaskErrorCode.INVALID_TASK_TITLE));
+
+
         // priority 값 검증
         Priority priority = Optional.ofNullable(requestDto.getPriority())
                 .map(p -> {
@@ -58,8 +61,9 @@ public class TaskService {
 
         TaskStatus taskStatus = TaskStatus.TODO;
 
+
         Task newTask = new Task(
-                requestDto.getTitle(),
+                title,
                 requestDto.getDescription(),
                 priority,
                 assignee,
@@ -77,7 +81,7 @@ public class TaskService {
     // Task 조회 - 전체
     public PagedResponse<TaskReadResponseDto> getTasksByStatus(Optional<TaskStatus> status, int page, int size) {
 
-        Pageable pageable = PageRequest.of(page - 1, size);
+        Pageable pageable = PageRequest.of(page, size);
 
         Page<Task> tasks;
 
@@ -97,7 +101,7 @@ public class TaskService {
     // Task 조회 - 제목(title) 검색
     public PagedResponse<TaskReadResponseDto> searchTasksByTitle(String searchText, int page, int size) {
 
-        Pageable pageable = PageRequest.of(page - 1, size);
+        Pageable pageable = PageRequest.of(page, size);
 
         Page<Task> searchTask = taskRepository.findByTitleContaining(searchText, pageable);
 
@@ -110,7 +114,7 @@ public class TaskService {
     // Task 조회 - 내용(description) 검색
     public PagedResponse<TaskReadResponseDto> searchTasksByDescription(String searchText, int page, int size) {
 
-        Pageable pageable = PageRequest.of(page - 1, size);
+        Pageable pageable = PageRequest.of(page, size);
 
         Page<Task> searchTask = taskRepository.findByDescriptionContaining(searchText, pageable);
 
