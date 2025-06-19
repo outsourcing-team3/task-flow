@@ -3,10 +3,11 @@ package com.example.outsourcingproject.domain.task.controller;
 import com.example.outsourcingproject.domain.task.dto.*;
 import com.example.outsourcingproject.domain.task.enums.TaskStatus;
 import com.example.outsourcingproject.domain.task.service.TaskService;
-import com.example.outsourcingproject.global.aop.annotation.TaskActivityLog;
+import com.example.outsourcingproject.global.aop.annotation.ActivityLog;
 import com.example.outsourcingproject.global.dto.ApiResponse;
 import com.example.outsourcingproject.global.dto.PagedResponse;
 import com.example.outsourcingproject.global.enums.ActivityType;
+import com.example.outsourcingproject.global.enums.TargetType;
 import com.example.outsourcingproject.global.security.UserPrincipal;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -25,7 +26,7 @@ public class TaskController {
     private final TaskService taskService;
 
     // Task 생성
-    @TaskActivityLog(type = ActivityType.TASK_CREATED)
+    @ActivityLog(type = ActivityType.TASK_CREATED, target = TargetType.TASK)
     @PostMapping("/tasks")
     public ResponseEntity<ApiResponse<TaskCreateResponseDto>> createTask(@AuthenticationPrincipal UserPrincipal userPrincipal, @RequestBody TaskCreateRequestDto requestDto) {
 
@@ -79,7 +80,7 @@ public class TaskController {
     }
 
     // 특정 Task 수정 - 제목, 내용, 우선순위, 담당자, 마감일, 시작일
-    @TaskActivityLog(type = ActivityType.TASK_UPDATED)
+    @ActivityLog(type = ActivityType.TASK_UPDATED, target = TargetType.TASK)
     @PatchMapping("/tasks/{taskId}")
     public ResponseEntity<ApiResponse<TaskReadResponseDto>> updateTask(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
@@ -93,8 +94,8 @@ public class TaskController {
         return ResponseEntity.ok(ApiResponse.success(updatedTask, "Task 가 수정되었습니다."));
     }
 
+    @ActivityLog(type = ActivityType.TASK_STATUS_CHANGED, target = TargetType.TASK)
     @PatchMapping("/tasks/status/{taskId}")
-    @TaskActivityLog(type = ActivityType.TASK_STATUS_CHANGED)
     public ResponseEntity<ApiResponse<TaskReadResponseDto>> updateStatusTask(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @PathVariable Long taskId,
@@ -107,6 +108,7 @@ public class TaskController {
         return ResponseEntity.ok(ApiResponse.success(updateTaskStatus, "Task 상태가 [" + updateTaskStatus.getStatus() + "] (으)로 변경되었습니다."));
     }
 
+    @ActivityLog(type = ActivityType.TASK_DELETED, target = TargetType.TASK)
     @DeleteMapping("/tasks/{taskId}")
     public ResponseEntity<ApiResponse<String>> deleteTask(@PathVariable Long taskId) {
         taskService.deleteTask(taskId);
