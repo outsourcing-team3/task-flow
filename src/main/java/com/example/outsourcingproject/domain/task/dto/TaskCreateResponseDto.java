@@ -20,7 +20,8 @@ public class TaskCreateResponseDto {
 
     private String priority;
 
-    private String assigneeName;
+//    private String assigneeName;
+    private UserSummaryDto assignee;
 
     private String creator;
 
@@ -32,7 +33,7 @@ public class TaskCreateResponseDto {
 
     public TaskCreateResponseDto(Long id, String title, String description,
                                  String status,
-                                 LocalDateTime deadline, String priority, String assigneeName,
+                                 LocalDateTime deadline, String priority, UserSummaryDto assignee,
                                  String creator,
                                  LocalDateTime startedAt, LocalDateTime createdAt,
                                  LocalDateTime updatedAt
@@ -43,7 +44,7 @@ public class TaskCreateResponseDto {
         this.status = status;
         this.deadline = deadline;
         this.priority = priority;
-        this.assigneeName = assigneeName;
+        this.assignee = assignee;
         this.creator = creator;
         this.startedAt = startedAt;
         this.createdAt = createdAt;
@@ -58,7 +59,7 @@ public class TaskCreateResponseDto {
                 task.getStatus().name(),
                 task.getDeadline(),
                 task.getPriority().name(),
-                task.getAssignee().getName(),
+                new UserSummaryDto(task.getAssignee()),
                 task.getCreator().getName(),
                 task.getStartedAt(),
                 task.getCreatedAt(),
