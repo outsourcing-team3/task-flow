@@ -8,7 +8,6 @@ import com.example.outsourcingproject.domain.auth.dto.response.SigninResponseDto
 import com.example.outsourcingproject.domain.auth.dto.response.SignupResponseDto;
 import com.example.outsourcingproject.domain.auth.service.AuthService;
 import com.example.outsourcingproject.global.aop.annotation.ActivityLog;
-import com.example.outsourcingproject.global.aop.annotation.UserActivityLog;
 import com.example.outsourcingproject.global.dto.ApiResponse;
 import com.example.outsourcingproject.global.enums.ActivityType;
 import com.example.outsourcingproject.global.enums.TargetType;
@@ -36,7 +35,6 @@ public class AuthController {
         return ResponseEntity.ok(ApiResponse.success(response, "회원가입이 완료되었습니다."));
     }
 
-    @UserActivityLog(type = ActivityType.USER_LOGGED_IN)
     @ActivityLog(type = ActivityType.USER_LOGGED_IN, target = TargetType.USER)
     @PostMapping("/auth/login")
     public ResponseEntity<ApiResponse<SigninResponseDto>> signin(@Valid @RequestBody SigninRequestDto signinRequest) {
@@ -51,7 +49,6 @@ public class AuthController {
         return ResponseEntity.ok(ApiResponse.success(response,"토큰이 갱신되었습니다."));
     }
 
-    @UserActivityLog(type = ActivityType.USER_LOGGED_OUT)
     @PostMapping("/auth/logout")
     public ResponseEntity<ApiResponse<Void>> logout(@AuthenticationPrincipal UserPrincipal userPrincipal,
                                                     HttpServletRequest request) {

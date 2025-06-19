@@ -5,6 +5,7 @@ import com.example.outsourcingproject.global.aop.aspect.util.ActivityLogAspectUt
 import org.aspectj.lang.ProceedingJoinPoint;
 
 public abstract class AbstractActivityLogStrategy implements ActivityLogStrategy{
+
     protected ProceedingJoinPoint joinPoint;
     protected ActivityLog activityLog;
     protected Object response;
