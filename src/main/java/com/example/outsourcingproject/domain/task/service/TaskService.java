@@ -7,15 +7,17 @@ import com.example.outsourcingproject.domain.task.enums.TaskStatus;
 import com.example.outsourcingproject.domain.task.repository.TaskRepository;
 import com.example.outsourcingproject.domain.user.entity.User;
 import com.example.outsourcingproject.domain.user.repository.UserRepository;
+import com.example.outsourcingproject.global.dto.PagedResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
 
 @Slf4j
@@ -76,33 +78,49 @@ public class TaskService {
     }
 
     // Task 조회 - 전체
-    public List<TaskReadResponseDto> getTasksByStatus(Optional<TaskStatus> status) {
-        List<Task> tasks;
+    public PagedResponse<TaskReadResponseDto> getTasksByStatus(Optional<TaskStatus> status, int page, int size) {
+
+        Pageable pageable = PageRequest.of(page - 1, size);
+
+        Page<Task> tasks;
 
         // Status 값이 있을 경우 해당 Status 에 맞는 Task 조회
         if (status.isPresent()) {
-            tasks = taskRepository.findAllByIsDeletedFalseAndStatus(status.get());
+            tasks = taskRepository.findAllByIsDeletedFalseAndStatus(status.get(), pageable);
         } else { // Status 값이 없을 경우 모든 Task 조회
-            tasks = taskRepository.findAllByIsDeletedFalse();
+            tasks = taskRepository.findAllByIsDeletedFalse(pageable);
         }
 
-        return tasks.stream().map(TaskReadResponseDto::toDto).toList();
+        // Page<TaskReadResponseDto> 타입으로 변환
+        Page<TaskReadResponseDto> result = tasks.map(TaskReadResponseDto::toDto);
+
+        return PagedResponse.toPagedResponse(result);
     }
 
     // Task 조회 - 제목(title) 검색
-    public List<TaskReadResponseDto> searchTasksByTitle(String searchText) {
+    public PagedResponse<TaskReadResponseDto> searchTasksByTitle(String searchText, int page, int size) {
 
-        List<Task> searchResult = taskRepository.findByTitleContaining(searchText);
+        Pageable pageable = PageRequest.of(page - 1, size);
 
-        return searchResult.stream().map(TaskReadResponseDto::toDto).toList();
+        Page<Task> searchTask = taskRepository.findByTitleContaining(searchText, pageable);
+
+        // Page<TaskReadResponseDto> 타입으로 변환
+        Page<TaskReadResponseDto> result = searchTask.map(TaskReadResponseDto::toDto);
+
+        return PagedResponse.toPagedResponse(result);
     }
 
     // Task 조회 - 내용(description) 검색
-    public List<TaskReadResponseDto> searchTasksByDescription(String searchText) {
+    public PagedResponse<TaskReadResponseDto> searchTasksByDescription(String searchText, int page, int size) {
 
-        List<Task> searchResult = taskRepository.findByDescriptionContaining(searchText);
+        Pageable pageable = PageRequest.of(page - 1, size);
 
-        return searchResult.stream().map(TaskReadResponseDto::toDto).toList();
+        Page<Task> searchTask = taskRepository.findByDescriptionContaining(searchText, pageable);
+
+        // Page<TaskReadResponseDto> 타입으로 변환
+        Page<TaskReadResponseDto> result = searchTask.map(TaskReadResponseDto::toDto);
+
+        return PagedResponse.toPagedResponse(result);
     }
 
 
