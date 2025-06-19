@@ -7,7 +7,6 @@ import com.example.outsourcingproject.domain.auth.exception.UserNotFoundExceptio
 import com.example.outsourcingproject.domain.user.repository.UserRepository;
 import com.example.outsourcingproject.global.dto.PagedResponse;
 import com.example.outsourcingproject.global.enums.ActivityType;
-import com.example.outsourcingproject.global.enums.TargetType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
@@ -29,7 +28,6 @@ public class ActivityLogService {
         }
 
         ActivityType activityType = ActivityType.of(option.getActivityType()).orElse(null);
-        TargetType targetType = TargetType.fromId(option.getTaskId()).orElse(null);
 
         LocalDateTime startDateTime = option.getStartDate() != null ? option.getStartDate().atStartOfDay() : null;
         LocalDateTime endDateTime = option.getEndDate() != null ? option.getEndDate().atTime(LocalTime.MAX) : null;
@@ -37,7 +35,7 @@ public class ActivityLogService {
         Page<ActivityLogResponseDto> logPages = activityLogRepository.findActivityLogs(
                 option.getUserId(),
                 activityType,
-                targetType,
+                option.getTaskId(),
                 startDateTime,
                 endDateTime,
                 option.getPageable()

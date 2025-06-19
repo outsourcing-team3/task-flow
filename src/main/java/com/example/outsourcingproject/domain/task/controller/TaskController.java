@@ -82,7 +82,7 @@ public class TaskController {
 
     // 특정 Task 수정 - 제목, 내용, 우선순위, 담당자, 마감일, 시작일
     @ActivityLog(type = ActivityType.TASK_UPDATED, target = TargetType.TASK)
-    @PatchMapping("/tasks/{taskId}")
+    @PutMapping("/tasks/{taskId}")
     public ResponseEntity<ApiResponse<TaskReadResponseDto>> updateTask(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @PathVariable Long taskId,

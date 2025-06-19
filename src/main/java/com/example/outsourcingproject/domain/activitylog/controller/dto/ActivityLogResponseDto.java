@@ -1,6 +1,7 @@
 package com.example.outsourcingproject.domain.activitylog.controller.dto;
 
 import com.example.outsourcingproject.domain.activitylog.domain.model.ActivityLog;
+import com.example.outsourcingproject.domain.user.dto.UserResponseDto;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
