@@ -38,7 +38,7 @@ class DashboardServiceTest {
     @Test
     @DisplayName("주간 통계가 올바르게 계산된다")
     void getWeeklyStatistics_success() {
-        // Arrange
+        // given
         LocalDate date = LocalDate.of(2025, 6, 18); // 수요일
         LocalDate monday = date.with(DayOfWeek.MONDAY);
         LocalDateTime weekStart = monday.atStartOfDay();
@@ -58,10 +58,10 @@ class DashboardServiceTest {
         )).thenReturn(2L);
         when(taskStatisticsRepository.countByCreatedAtBetween(prevWeekStart, prevWeekEnd)).thenReturn(5L);
 
-        // Act
+        // when
         DashboardStatisticsDto dto = dashboardService.getWeeklyStatistics(date);
 
-        // Assert
+        //then
         assertThat(dto.getTotalCount()).isEqualTo(10);
         assertThat(dto.getWeeklyChangeRate()).isEqualTo(100.0);
         assertThat(dto.getCompletionRate()).isEqualTo(30.0);
@@ -74,7 +74,7 @@ class DashboardServiceTest {
     @Test
     @DisplayName("오늘 태스크 조회시 repository가 올바른 파라미터로 호출된다")
     void getMyTodayTasks_callsRepositoryCorrectly() {
-        // Arrange
+        // given
         Long userId = 1L;
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime end = now.toLocalDate().plusDays(1).atStartOfDay();
@@ -89,17 +89,17 @@ class DashboardServiceTest {
                 eq(List.of(TaskStatus.TODO, TaskStatus.IN_PROGRESS)), eq(now), eq(end), eq(topFive)))
                 .thenReturn(expected);
 
-        // Act
+        // when
         List<TodayTaskItemDto> result = dashboardService.getMyTodayTasks(userId);
 
-        // Assert
+        //then
         assertThat(result).containsExactlyElementsOf(expected);
     }
 
     @Test
     @DisplayName("주간 트렌드 변환이 Projection을 DTO로 매핑한다")
     void weeklyTrend_mapsProjection() {
-        // Arrange
+        // given
         LocalDate today = LocalDate.of(2025, 6, 18);
         LocalDate monday = today.with(DayOfWeek.MONDAY);
         LocalDateTime start = monday.atStartOfDay();
@@ -110,10 +110,10 @@ class DashboardServiceTest {
 
         when(taskStatisticsRepository.fetchDailyTrend(start, end)).thenReturn(List.of(p1, p2));
 
-        // Act
+        // when
         List<DailyTaskTrendDto> dtos = dashboardService.getWeeklyTrend(today);
 
-        // Assert
+        //then
         assertThat(dtos).hasSize(2)
                 .extracting(DailyTaskTrendDto::getTotalCount)
                 .containsExactly(4L, 3L);
@@ -122,17 +122,17 @@ class DashboardServiceTest {
     @Test
     @DisplayName("상태 비율 계산 DTO 반환")
     void statusRatio_success() {
-        // Arrange
+        // given
         when(taskStatisticsRepository.countGroupByStatus()).thenReturn(List.of(
                 TaskStatusCountDto.of(TaskStatus.TODO, 2),
                 TaskStatusCountDto.of(TaskStatus.IN_PROGRESS, 3),
                 TaskStatusCountDto.of(TaskStatus.DONE, 5)
         ));
 
-        // Act
+        // when
         TaskStatusRatioDto dto = dashboardService.getStatusRatio();
 
-        // Assert
+        //then
         assertThat(dto.getTodoCount()).isEqualTo(2);
         assertThat(dto.getInProgressCount()).isEqualTo(3);
         assertThat(dto.getDoneCount()).isEqualTo(5);
@@ -141,7 +141,7 @@ class DashboardServiceTest {
     @Test
     @DisplayName("진행률 계산")
     void progressRatio_success() {
-        // Arrange
+        // given
         Long userId = 1L;
         when(taskStatisticsRepository.countMyStatus(userId)).thenReturn(List.of(
                 TaskStatusCountDto.of(TaskStatus.TODO, 1),
@@ -154,10 +154,10 @@ class DashboardServiceTest {
                 TaskStatusCountDto.of(TaskStatus.DONE, 5)
         ));
 
-        // Act
+        // when
         ProgressRatioDto dto = dashboardService.getProgressRatio(userId);
 
-        // Assert
+        //then
         assertThat(dto.getMyRate()).isEqualTo(50.0); // 2/4
         assertThat(dto.getTeamRate()).isEqualTo(50.0); // 5/10
     }
@@ -165,7 +165,7 @@ class DashboardServiceTest {
     @Test
     @DisplayName("월간 트렌드는 12개의 DTO를 리턴한다")
     void monthlyTrend_success() {
-        // Arrange
+        // given
         int year = 2025;
         List<MonthlyTaskTrendProjection> projections = List.of(
                 monthlyProjection(1, 2, 1),
@@ -174,10 +174,10 @@ class DashboardServiceTest {
 
         when(taskStatisticsRepository.fetchFixedMonthlyTrend(year)).thenReturn(projections);
 
-        // Act
+        // when
         List<MonthlyTaskTrendDto> result = dashboardService.getMonthlyTrend();
 
-        // Assert
+        // then
         assertThat(result).hasSize(12);
         assertThat(result.get(0).getTotalCount()).isEqualTo(2);
         assertThat(result.get(5).getTotalCount()).isEqualTo(5);
@@ -186,16 +186,16 @@ class DashboardServiceTest {
     @Test
     @DisplayName("활동 피드 조회")
     void activityFeed_success() {
-        // Arrange
+        // given
         List<ActivityFeedDto> feeds = List.of(
                 ActivityFeedDto.of("user", "메시지", LocalDateTime.now())
         );
         when(acitivityFeedRepository.fetchFeed(any(), any(), any(Pageable.class))).thenReturn(feeds);
 
-        // Act
+        // when
         List<ActivityFeedDto> result = dashboardService.getAcitivityFeed();
 
-        // Assert
+        //then
         assertThat(result).isEqualTo(feeds);
     }
 
