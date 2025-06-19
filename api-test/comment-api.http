@@ -1,3 +1,14 @@
+POST http://localhost:8080/api/auth/register
+Content-Type: application/json
+
+{
+  "name": "홍길동",
+  "username": "asd123",
+  "email" : "test@test.com",
+  "password": "Test1234!!"
+}
+
+###
 POST http://localhost:8080/api/auth/login
 Content-Type: application/json
 
@@ -6,13 +17,24 @@ Content-Type: application/json
   "password": "Test1234!!"
 }
 > {%
-    client.global.set("access_token", response.body.valueOf("data.token"))
+    client.global.set("access_token", response.body.data.token)
 %}
 
 ###
-GET http://localhost:8080/api/tasks/1
-Content-Type: application/json
+POST http://localhost:8080/api/tasks
 Authorization: Bearer {{access_token}}
+Content-Type: application/json
+
+{
+  "title": "task title",
+  "description" : "task description",
+  "priority" : "LOW"
+}
+
+###
+GET http://localhost:8080/api/tasks/1
+Authorization: Bearer {{access_token}}
+Content-Type: application/json
 
 ###
 POST http://localhost:8080/api/1/comments
@@ -22,3 +44,8 @@ Content-Type: application/json
 {
   "content": "댓글 테스트"
 }
+
+###
+GET http://localhost:8080/api/1/comments
+Authorization: Bearer {{access_token}}
+Content-Type: application/json

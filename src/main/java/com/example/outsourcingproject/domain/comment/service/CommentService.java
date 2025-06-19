@@ -12,6 +12,8 @@ import com.example.outsourcingproject.domain.user.entity.User;
 import com.example.outsourcingproject.domain.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -57,9 +59,15 @@ public class CommentService {
     }
 
     @Transactional
-    public void deleteComment(Long taskId, Long commentId) {
+    public void deleteComment(Long taskId, Long commentId, Long userId) {
         Comment comment = commentRepository.findByIdAndIsDeletedFalse(commentId)
                 .orElseThrow(() -> new CustomException(CustomErrorCode.COMMENT_NOT_FOUND));
+
+        // 🔐 본인 확인
+        if (!comment.getUser().getId().equals(userId)) {
+            throw new CustomException(CustomErrorCode.UNAUTHORIZED);
+        }
+
         comment.softDelete();
     }
 
@@ -76,5 +84,14 @@ public class CommentService {
         return commentRepository.findAllByTaskAndContentContainingIgnoreCaseOrderByCreatedAtDesc(task, keyword).stream()
                 .map(CommentResponseDto::new)
                 .collect(Collectors.toList());
+    }
+
+    public Page<CommentResponseDto> getCommentsByTaskPaged(Long taskId, Pageable pageable) {
+        Task task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new CustomException(CustomErrorCode.TASK_NOT_FOUND));
+
+        Page<Comment> commentPage = commentRepository.findByTaskAndIsDeletedFalseOrderByCreatedAtDesc(task, pageable);
+
+        return commentPage.map(CommentResponseDto::new);
     }
 }
