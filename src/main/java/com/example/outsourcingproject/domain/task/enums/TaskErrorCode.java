@@ -14,6 +14,7 @@ public enum TaskErrorCode {
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 유저를 찾을 수 없습니다."),
 
     // 태스크 관련
+    INVALID_TASK_TITLE(HttpStatus.BAD_REQUEST, "태스크 생성 시에는 제목을 필수로 입력해야 합니다"),
     TASK_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 태스크를 찾을 수 없습니다."),
 
     // 작업 상태 관련
