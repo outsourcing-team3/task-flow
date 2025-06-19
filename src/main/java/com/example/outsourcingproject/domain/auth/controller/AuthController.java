@@ -49,6 +49,7 @@ public class AuthController {
         return ResponseEntity.ok(ApiResponse.success(response,"토큰이 갱신되었습니다."));
     }
 
+    @ActivityLog(type = ActivityType.USER_LOGGED_OUT, target = TargetType.USER)
     @PostMapping("/auth/logout")
     public ResponseEntity<ApiResponse<Void>> logout(@AuthenticationPrincipal UserPrincipal userPrincipal,
                                                     HttpServletRequest request) {

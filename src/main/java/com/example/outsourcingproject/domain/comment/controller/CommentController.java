@@ -3,6 +3,9 @@ package com.example.outsourcingproject.domain.comment.controller;
 import com.example.outsourcingproject.domain.comment.dto.CommentRequestDto;
 import com.example.outsourcingproject.domain.comment.dto.CommentResponseDto;
 import com.example.outsourcingproject.domain.comment.service.CommentService;
+import com.example.outsourcingproject.global.aop.annotation.ActivityLog;
+import com.example.outsourcingproject.global.enums.ActivityType;
+import com.example.outsourcingproject.global.enums.TargetType;
 import com.example.outsourcingproject.global.security.UserPrincipal;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +22,7 @@ public class CommentController {
     private final CommentService commentService;
 
     //댓글 작성
+    @ActivityLog(type = ActivityType.COMMENT_CREATED, target = TargetType.COMMENT)
     @PostMapping("/{taskId}/comments")
     public ResponseEntity<CommentResponseDto> createComment(
             @PathVariable Long taskId,
@@ -30,6 +34,7 @@ public class CommentController {
         return ResponseEntity.ok(responseDto);    }
 
     //댓글 수정
+    @ActivityLog(type = ActivityType.COMMENT_UPDATED, target = TargetType.COMMENT)
     @PutMapping("/{taskId}/comments/{commentId}")
     public ResponseEntity<CommentResponseDto> updateComment(
             @PathVariable Long taskId,
@@ -40,6 +45,7 @@ public class CommentController {
     }
 
     //댓글 삭제(Soft Delete)
+    @ActivityLog(type = ActivityType.COMMENT_DELETED, target = TargetType.COMMENT)
     @DeleteMapping("/{taskId}/comments/{commentId}")
     public ResponseEntity<Void> deleteComment(
             @PathVariable Long taskId,
