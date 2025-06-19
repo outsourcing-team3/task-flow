@@ -64,35 +64,5 @@ public class CommentActivityLogAspect {
     }
 
 
-//    private Long getCommentId(CommentActivityLog commentActivityLog, JoinPoint joinPoint, Object response) {
-//        if(commentActivityLog.type().equals(ActivityType.COMMENT_CREATED)) {
-//            return getCommentFromResponseDto(response);
-//        } else {
-//            return getCommentIdFromRequestParams(joinPoint);
-//        }
-//    }
-//
-//    private Long getCommentFromResponseDto(Object response) {
-//        if (
-//                response instanceof ResponseEntity<?> entity
-//                && entity.getBody() instanceof ApiResponse<?> apiResponse
-//                && apiResponse.getData() instanceof CommentResponse dto
-//        ) {
-//            return dto.getId();
-//        }
-//        return null;
-//    }
-//
-//    private Long getCommentIdFromRequestParams(JoinPoint joinPoint) {
-//        MethodSignature signature = (MethodSignature) joinPoint.getSignature();
-//        String[] parameterNames = signature.getParameterNames();
-//        Object[] args = joinPoint.getArgs();
-//
-//        for (int i = 0; i < parameterNames.length; i++) {
-//            if ("commentId".equals(parameterNames[i]) && args[i] instanceof Long longArg) {
-//                return longArg;
-//            }
-//        }
-//        return null;
-//    }
+
 }
