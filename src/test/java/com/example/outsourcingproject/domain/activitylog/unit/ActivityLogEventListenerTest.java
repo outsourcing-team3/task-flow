@@ -41,6 +41,8 @@ public class ActivityLogEventListenerTest {
                 userId,
                 ActivityType.USER_LOGGED_IN,
                 TargetType.USER,
+                123123L,
+                "테스트",
                 "127.0.0.1",
                 RequestMethod.GET,
                 "/api/test"
