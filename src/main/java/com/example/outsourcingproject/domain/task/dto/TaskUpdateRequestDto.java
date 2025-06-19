@@ -1,5 +1,6 @@
 package com.example.outsourcingproject.domain.task.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
@@ -15,7 +16,11 @@ public class TaskUpdateRequestDto {
     private String description;
     private String priority;
     private String assigneeName;
+
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
     private LocalDateTime deadline;
+
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
     private LocalDateTime startedAt;
 }
 

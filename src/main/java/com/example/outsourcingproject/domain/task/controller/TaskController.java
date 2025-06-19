@@ -9,6 +9,7 @@ import com.example.outsourcingproject.global.dto.PagedResponse;
 import com.example.outsourcingproject.global.enums.ActivityType;
 import com.example.outsourcingproject.global.enums.TargetType;
 import com.example.outsourcingproject.global.security.UserPrincipal;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,7 +29,7 @@ public class TaskController {
     // Task 생성
     @ActivityLog(type = ActivityType.TASK_CREATED, target = TargetType.TASK)
     @PostMapping("/tasks")
-    public ResponseEntity<ApiResponse<TaskCreateResponseDto>> createTask(@AuthenticationPrincipal UserPrincipal userPrincipal, @RequestBody TaskCreateRequestDto requestDto) {
+    public ResponseEntity<ApiResponse<TaskCreateResponseDto>> createTask(@AuthenticationPrincipal UserPrincipal userPrincipal, @Valid @RequestBody TaskCreateRequestDto requestDto) {
 
         Long currentUserId = userPrincipal.getId();
 
@@ -85,7 +86,7 @@ public class TaskController {
     public ResponseEntity<ApiResponse<TaskReadResponseDto>> updateTask(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @PathVariable Long taskId,
-            @RequestBody TaskUpdateRequestDto requestDto
+            @Valid @RequestBody TaskUpdateRequestDto requestDto
             ) {
 
         Long currentUserId = userPrincipal.getId();  // 로그인된 유저의 ID
@@ -99,7 +100,7 @@ public class TaskController {
     public ResponseEntity<ApiResponse<TaskReadResponseDto>> updateStatusTask(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @PathVariable Long taskId,
-            @RequestBody TaskStatusUpdateRequestDto requestDto
+            @Valid @RequestBody TaskStatusUpdateRequestDto requestDto
             ) {
 
         Long currentUserId = userPrincipal.getId();  // 로그인된 유저의 ID
