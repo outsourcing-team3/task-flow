@@ -27,37 +27,31 @@ public class ActivityLogAspect {
 
     @Around("@annotation(activityLog)")
     public Object logActivity(ProceedingJoinPoint joinPoint, ActivityLog activityLog) throws Throwable {
-
-        log.info("ActivityLog aop 실행");
-
         Object response = joinPoint.proceed();
 
-        ActivityLogStrategy strategy = activityLogStrategyFactory.create(activityLog.target(), joinPoint, activityLog, response);
+        ActivityLogStrategy strategy = activityLogStrategyFactory.create(
+                activityLog.target(),joinPoint, activityLog, response
+        );
 
-        Long userId = strategy.getUserId();
-        if (userId == null) return response;
+        ActivityLogEventDto activityLogEventDto = getActivityLogEventDto(strategy, activityLog);
 
-        Long targetId = strategy.getTargetId();
-        String message = strategy.getMessage();
+        activityLogPublisher.publish(activityLogEventDto);
+        return response;
+    }
 
-        ActivityLogEventDto activityLogEventDto = new ActivityLogEventDto(
-                userId,
+    ActivityLogEventDto getActivityLogEventDto(ActivityLogStrategy strategy, ActivityLog activityLog) {
+        return new ActivityLogEventDto(
+                strategy.getUserId(),
                 activityLog.type(),
                 activityLog.target(),
-                targetId,
-                message,
+                strategy.getTargetId(),
+                strategy.getMessage(),
                 httpServletRequest.getRemoteAddr(),
                 RequestMethod.valueOf(httpServletRequest.getMethod()),
                 httpServletRequest.getRequestURI()
         );
-
-        // 이벤트 발행
-        activityLogPublisher.publish(activityLogEventDto);
-
-        return response;
     }
-
-
-
-
 }
+
+
+
