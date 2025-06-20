@@ -4,6 +4,8 @@ import com.example.outsourcingproject.domain.task.dto.TaskCreateRequestDto;
 import com.example.outsourcingproject.domain.task.dto.TaskCreateResponseDto;
 import com.example.outsourcingproject.domain.task.entity.Task;
 import com.example.outsourcingproject.domain.task.enums.Priority;
+import com.example.outsourcingproject.domain.task.enums.TaskErrorCode;
+import com.example.outsourcingproject.domain.task.exception.TaskException;
 import com.example.outsourcingproject.domain.task.repository.TaskRepository;
 import com.example.outsourcingproject.domain.user.entity.User;
 import com.example.outsourcingproject.domain.user.repository.UserRepository;
@@ -18,6 +20,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -65,6 +68,62 @@ class TaskServiceTest {
         assertThat(response.getPriority()).isEqualTo("HIGH");
         assertThat(response.getAssigneeName()).isEqualTo("AssigneeUser");
         assertThat(response.getCreator()).isEqualTo("CreatorUser");
+
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 로그인 유저 ID(탈퇴 등) 로 인한 Task 생성 실패 테스트")
+    void createTask_fail_whenUserNotFound() {
+
+        // given
+        Long userId = 999999999L; // 없는 ID
+        TaskCreateRequestDto requestDto = new TaskCreateRequestDto(
+                "Test Task",
+                "Description 123",
+                Priority.MEDIUM,
+                "AssigneeUser",
+                LocalDateTime.now().plusDays(1),
+                LocalDateTime.now()
+        );
+
+        // 로그인한 유저가 없다?
+        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+
+        // when & then
+        assertThatThrownBy(() -> taskService.createTask(userId, requestDto))
+                .isInstanceOf(TaskException.class)
+                .hasMessageContaining(TaskErrorCode.TASK_CREATOR_NOT_FOUND.getMessage());
+    }
+
+    @Test
+    @DisplayName("AssigneeName 이 null 일 경우 기본값으로 Creator 로 저장되는 지 - Task 생성 테스트")
+    void createTask_success_whenAssigneeNameIsBlank_thenDefaultToCreator() {
+
+        //given
+        Long userId = 1L;
+        String creatorName = "CreatorUser";
+
+        User creator = new User(userId, creatorName, "creator@test.com");
+
+        TaskCreateRequestDto requestDto = new TaskCreateRequestDto(
+                "Default Assignee",
+                "Assignee is null",
+                Priority.MEDIUM,
+                null,
+                LocalDateTime.now().plusDays(1),
+                LocalDateTime.now()
+        );
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(creator));
+        when(userRepository.findAll()).thenReturn(List.of(creator));
+        when(taskRepository.save(any(Task.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        //when
+        TaskCreateResponseDto response = taskService.createTask(userId, requestDto);
+
+        //then
+        assertThat(response.getAssigneeName()).isEqualTo(creatorName);
+        assertThat(response.getCreator()).isEqualTo(creatorName);
 
     }
 }
