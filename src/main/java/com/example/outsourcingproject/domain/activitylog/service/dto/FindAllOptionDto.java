@@ -13,7 +13,7 @@ public class FindAllOptionDto {
 
     private Long userId;
     private String activityType;
-    private Integer taskId;
+    private Long taskId;
 
     private LocalDate startDate;
     private LocalDate endDate;

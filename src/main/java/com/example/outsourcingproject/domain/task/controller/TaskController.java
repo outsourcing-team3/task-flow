@@ -46,27 +46,27 @@ public class TaskController {
     @GetMapping("/tasks")
     public ResponseEntity<ApiResponse<PagedResponse<TaskReadResponseDto>>> getAllTasks(
             @RequestParam Optional<TaskStatus> status,
-            @RequestParam (defaultValue = "1") int page,
+            @RequestParam (defaultValue = "0") int page,
             @RequestParam (defaultValue = "10") int size
     ) {
         PagedResponse<TaskReadResponseDto> getTasks = taskService.getTasksByStatus(status, page, size);
         return ResponseEntity.ok(ApiResponse.success(getTasks, "Task 를 조회하였습니다."));
     }
 
-    @GetMapping("/tasks/search/title")
+    @GetMapping("/tasks/search/")
     public ResponseEntity<ApiResponse<PagedResponse<TaskReadResponseDto>>> searchByTitle(
-            @RequestParam String searchText,
-            @RequestParam (defaultValue = "1") int page,
+            @RequestParam String query,
+            @RequestParam (defaultValue = "0") int page,
             @RequestParam (defaultValue = "10") int size
     ) {
-        PagedResponse<TaskReadResponseDto> searchTasks = taskService.searchTasksByTitle(searchText, page, size);
-        return ResponseEntity.ok(ApiResponse.success(searchTasks, "[" + searchText + "] 제목이 포함된 Task 를 조회하였습니다."));
+        PagedResponse<TaskReadResponseDto> searchTasks = taskService.searchTasksByTitle(query, page, size);
+        return ResponseEntity.ok(ApiResponse.success(searchTasks, "[" + query + "] 제목이 포함된 Task 를 조회하였습니다."));
     }
 
     @GetMapping("/tasks/search/desc")
     public ResponseEntity<ApiResponse<PagedResponse<TaskReadResponseDto>>> searchByDescription(
             @RequestParam String searchText,
-            @RequestParam (defaultValue = "1") int page,
+            @RequestParam (defaultValue = "0") int page,
             @RequestParam (defaultValue = "10") int size
     ) {
         PagedResponse<TaskReadResponseDto> searchTasks = taskService.searchTasksByDescription(searchText, page, size);
@@ -82,7 +82,7 @@ public class TaskController {
 
     // 특정 Task 수정 - 제목, 내용, 우선순위, 담당자, 마감일, 시작일
     @ActivityLog(type = ActivityType.TASK_UPDATED, target = TargetType.TASK)
-    @PatchMapping("/tasks/{taskId}")
+    @PutMapping("/tasks/{taskId}")
     public ResponseEntity<ApiResponse<TaskReadResponseDto>> updateTask(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @PathVariable Long taskId,
@@ -96,7 +96,7 @@ public class TaskController {
     }
 
     @ActivityLog(type = ActivityType.TASK_STATUS_CHANGED, target = TargetType.TASK)
-    @PatchMapping("/tasks/status/{taskId}")
+    @PatchMapping("/tasks/{taskId}/status")
     public ResponseEntity<ApiResponse<TaskReadResponseDto>> updateStatusTask(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @PathVariable Long taskId,

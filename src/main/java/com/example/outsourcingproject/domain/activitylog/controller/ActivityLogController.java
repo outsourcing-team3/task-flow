@@ -45,7 +45,7 @@ public class ActivityLogController {
                 pageable,
                 userId,
                 type,
-                taskId != null ? Integer.parseInt(taskId) : null,
+                taskId != null ? Long.parseLong(taskId) : null,
                 startDate,
                 endDate
         );

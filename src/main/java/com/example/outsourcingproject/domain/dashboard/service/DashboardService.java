@@ -1,6 +1,7 @@
 package com.example.outsourcingproject.domain.dashboard.service;
 
 import com.example.outsourcingproject.domain.dashboard.dto.*;
+import com.example.outsourcingproject.domain.dashboard.projection.DailyTaskTrendProjection;
 import com.example.outsourcingproject.domain.dashboard.repository.AcitivityFeedRepository;
 import com.example.outsourcingproject.domain.dashboard.repository.TaskStatisticsRepository;
 import com.example.outsourcingproject.domain.dashboard.dto.TodayTaskItemDto;
@@ -136,11 +137,27 @@ public class DashboardService {
         LocalDateTime start = monday.atStartOfDay();
         // 다음 주 월요일 00:00(미포함)까지 범위 조회
         LocalDateTime end = monday.plusWeeks(1).atStartOfDay();
+        // DB 조회
+        List<DailyTaskTrendProjection> raw = taskStatisticsRepository.fetchDailyTrend(start, end);
 
+        // 1. 결과를 Map으로 변환
+        Map<LocalDate, DailyTaskTrendProjection> map = raw.stream()
+                .collect(Collectors.toMap(DailyTaskTrendProjection::getDate, p -> p));
 
-        return taskStatisticsRepository.fetchDailyTrend(start, end).stream()
-                .map(p -> DailyTaskTrendDto.of(p.getDate(), p.getTotalCount(), p.getDoneCount()))
-                .collect(Collectors.toList());
+        // 2. 월~일 모두 돌면서 결과 만들기
+        List<DailyTaskTrendDto> result = new ArrayList<>();
+        for (int i = 0; i < 7; i++) {
+            LocalDate day = monday.plusDays(i);
+            DailyTaskTrendProjection p = map.get(day);
+
+            result.add(DailyTaskTrendDto.of(
+                    day,
+                    (p != null) ? p.getTotalCount() : 0,
+                    (p != null) ? p.getDoneCount() : 0
+            ));
+        }
+
+        return result;
 
     }
 

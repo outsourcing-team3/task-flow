@@ -1,4 +1,4 @@
-package com.example.outsourcingproject.domain.activitylog.controller.dto;
+package com.example.outsourcingproject.domain.user.dto;
 
 import com.example.outsourcingproject.domain.auth.entity.Auth;
 import lombok.Getter;
