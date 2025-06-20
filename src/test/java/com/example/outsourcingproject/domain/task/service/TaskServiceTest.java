@@ -66,7 +66,7 @@ class TaskServiceTest {
         //then
         assertThat(response.getTitle()).isEqualTo("New Task");
         assertThat(response.getPriority()).isEqualTo("HIGH");
-        assertThat(response.getAssigneeName()).isEqualTo("AssigneeUser");
+        assertThat(response.getAssignee().getName()).isEqualTo("AssigneeUser");
         assertThat(response.getCreator()).isEqualTo("CreatorUser");
 
     }
@@ -122,7 +122,7 @@ class TaskServiceTest {
         TaskCreateResponseDto response = taskService.createTask(userId, requestDto);
 
         //then
-        assertThat(response.getAssigneeName()).isEqualTo(creatorName);
+        assertThat(response.getAssignee().getName()).isEqualTo(creatorName);
         assertThat(response.getCreator()).isEqualTo(creatorName);
 
     }
