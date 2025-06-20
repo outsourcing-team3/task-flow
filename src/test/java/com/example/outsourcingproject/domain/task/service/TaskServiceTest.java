@@ -96,7 +96,7 @@ class TaskServiceTest {
     }
 
     @Test
-    @DisplayName("AssigneeName 이 null 일 경우 기본값으로 Creator 로 저장되는 지 - Task 생성 테스트")
+    @DisplayName("AssigneeName 이 null 일 경우 기본값으로 Creator 로 저장 -> Task 생성 성공 테스트")
     void createTask_success_whenAssigneeNameIsBlank_thenDefaultToCreator() {
 
         //given
@@ -125,5 +125,33 @@ class TaskServiceTest {
         assertThat(response.getAssignee().getName()).isEqualTo(creatorName);
         assertThat(response.getCreator()).isEqualTo(creatorName);
 
+    }
+
+    @Test
+    @DisplayName("AssigneeName 을 가진 유저가 존재하지 않을 경우 예외 처리 테스트")
+    void createTask_fail_whenAssigneeNameNotFound() {
+
+        // given
+        Long userId = 1L;
+        String NotFoundName = "NotFoundName";
+
+        User creator = new User(userId, "CreatorUser", "creator@test.com");
+
+        TaskCreateRequestDto requestDto = new TaskCreateRequestDto(
+                "Not Found Assignee",
+                "Assignee does not exist",
+                Priority.MEDIUM,
+                NotFoundName,
+                LocalDateTime.now().plusDays(1),
+                LocalDateTime.now()
+        );
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(creator));
+        when(userRepository.findAll()).thenReturn(List.of(creator));
+
+        // when & then
+        assertThatThrownBy(() -> taskService.createTask(userId, requestDto))
+                .isInstanceOf(TaskException.class)
+                .hasMessageContaining(TaskErrorCode.USER_NOT_FOUND.getMessage());
     }
 }
