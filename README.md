@@ -103,21 +103,45 @@ docker run -d -p 3000:3000 dannyseo4284/taskflow-frontend:latest
 
 ### ERD 구조
 
-![ERD](images/ERD.png)
+![ERD](ERD.png)
 
-### API 엔드포인트
+## API 엔드포인트
 
-**총 26개 엔드포인트**
+**총 28개 엔드포인트**
 
-| 기능 영역 | 엔드포인트 수 | 주요 기능 |
-|-----------|---------------|-----------|
-| **인증** | 5개 | 회원가입, 로그인, 토큰 갱신, 로그아웃, 탈퇴 |
-| **사용자** | 1개 | 프로필 조회 |
-| **태스크** | 8개 | CRUD, 상태 변경, 검색 |
-| **댓글** | 4개 | 댓글 CRUD |
-| **대시보드** | 7개 | 통계, 트렌드, 진행률 |
-| **활동 로그** | 1개 | 사용자의 주요 행동(예: 작업 생성, 수정, 삭제 등)  |
-
+```
+API Count Summary
+==========================
+  - AuthController.java
+    ├── POST APIs:        5
+  - CommentController.java
+    ├── GET APIs:        1
+    ├── POST APIs:        1
+    ├── PUT APIs:        1
+    └── DELETE APIs:        1
+  - UserController.java
+    ├── GET APIs:        2
+  - DashboardController.java
+    ├── GET APIs:        8
+  - TaskController.java
+    ├── GET APIs:        4
+    ├── POST APIs:        1
+    ├── PATCH APIs:        1
+    ├── PUT APIs:        1
+    └── DELETE APIs:        1
+  - ActivityLogController.java
+    ├── GET APIs:        1
+==========================
+API Statistics
+==========================
+- GET APIs: 16
+- POST APIs: 7
+- PATCH APIs: 1
+- PUT APIs: 2
+- DELETE APIs: 2
+- Total APIs: 28
+==========================
+```
 ---
 
 ## 기술적 선택 근거
